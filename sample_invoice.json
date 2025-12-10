@@ -1,0 +1,30 @@
+{
+  "invoice_id": "INV-TEST-0001",
+  "invoice_date": "2025-12-01",
+  "supplier_gstin": "27ABCDE1234F2Z5",
+  "recipient_gstin": "27ZZZZZ1234Z1Z9",
+  "supplier_pan": "ABCDE1234F",
+  "recipient_pan": "ZZZZZ1234Z",
+  "supplier_name": "Test Supplier Pvt Ltd",
+  "recipient_name": "Buyer Co",
+  "supplier_address": "Mumbai",
+  "recipient_address": "Mumbai",
+  "items": [
+    {
+      "hsn_sac": "1001",
+      "description": "Widgets",
+      "quantity": 10,
+      "unit": "pcs",
+      "rate": 100.0,
+      "taxable_value": 1000.0,
+      "tax_components": {"cgst": 90.0, "sgst": 90.0, "igst": 0.0, "cess": 0.0}
+    }
+  ],
+  "total_value": 1180.0,
+  "tax_total": 180.0,
+  "place_of_supply": "27",
+  "supply_type": "B2B",
+  "currency": "INR",
+  "source_type": "CSV",
+  "source_system": "demo"
+}
