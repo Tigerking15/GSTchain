@@ -1,0 +1,57 @@
+{
+    "invoice_metadata": {
+        "supply_type": "E-INV",
+        "source_system": "Word-to-PDF-Test",
+        "is_einvoice": true
+    },
+    "header": {
+        "invoice_id": "INV-2025-001",
+        "invoice_date": "2025-12-03",
+        "currency": "INR",
+        "place_of_supply": "27-Maharashtra"
+    },
+    "compliance": {
+        "irn": "64_DIGIT_HEX_HASH_VALUE_HERE",
+        "ack_no": "1223334444555",
+        "ack_date": "2025-12-05 10:30:00"
+    },
+    "supplier": {
+        "name": "Circular Trader C Supplier",
+        "gstin": "27CCCC1234C1Z1",
+        "pan": "CCCCC1234C",
+        "address": "Pune, Maharashtra"
+    },
+    "recipient": {
+        "name": "Test Supplier Pvt Ltd Recipient",
+        "gstin": "27ABCDE1234F2Z5",
+        "pan": "ABCDE1234F",
+        "address": "Mumbai, Maharashtra"
+    },
+    "items": [
+        {
+            "item_id": "1",
+            "description": "Consultancy\nServices",
+            "hsn_sac": "9983",
+            "quantity": "1",
+            "uom": "NOS",
+            "unit_price": "1600.00",
+            "taxable_value": 1600.0,
+            "gst_rate": 18.0,
+            "cgst_amount": 144.0,
+            "sgst_amount": 144.0,
+            "math_validation": "MATCHED"
+        }
+    ],
+    "totals": {
+        "total_taxable_value": 1600.0,
+        "cgst_total": 144.0,
+        "sgst_total": 144.0,
+        "grand_total": 1888.0
+    },
+    "final_validation": {
+        "items_taxable_sum": 1600.0,
+        "items_gst_sum": 288.0,
+        "calculated_grand_total": 1888.0,
+        "grand_total_status": "MATCHED"
+    }
+}
