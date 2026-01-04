@@ -1,0 +1,595 @@
+[
+  {
+    "invoice_metadata": {"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-001","invoice_date":"2023-04-18","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN001","ack_no":"ACK001","ack_date":"2023-04-18 10:10:00","qr_code_data":"QR001"},
+    "supplier":{"gstin":"27ABCDE1234F1Z5","pan":"ABCDE1234F","name":"Shree Metals Pvt Ltd","address":"Pune, Maharashtra"},
+    "recipient":{"gstin":"29PQRSX5678L1Z3","pan":"PQRSX5678L","name":"Bangalore Auto Works","address":"Bengaluru, Karnataka"},
+    "items":[{"item_id":1,"description":"Steel Scrap","hsn_sac":"7204","quantity":1200,"uom":"KG","unit_price":42,"taxable_value":50400,"gst_rate":18,"cgst_amount":4536,"sgst_amount":4536,"igst_amount":0}],
+    "totals":{"total_taxable_value":50400,"cgst_total":4536,"sgst_total":4536,"igst_total":0,"tax_total":9072,"grand_total":59472}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-002","invoice_date":"2023-06-02","currency":"INR","place_of_supply":"24-Gujarat"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2023-06-02 12:40:00","qr_code_data":null},
+    "supplier":{"gstin":"24LMNOP6789Q1Z8","pan":"LMNOP6789Q","name":"Gujarat Textiles Ltd","address":"Ahmedabad, Gujarat"},
+    "recipient":{"gstin":"33WXYZA1122R1Z6","pan":"WXYZA1122R","name":"Chennai Garments","address":"Chennai, Tamil Nadu"},
+    "items":[{"item_id":1,"description":"Cotton Fabric","hsn_sac":"5208","quantity":900,"uom":"MTR","unit_price":92,"taxable_value":82800,"gst_rate":5,"cgst_amount":2070,"sgst_amount":2070,"igst_amount":0}],
+    "totals":{"total_taxable_value":82800,"cgst_total":2070,"sgst_total":2070,"igst_total":0,"tax_total":4140,"grand_total":86940}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_ORACLE","is_einvoice":true},
+    "header":{"invoice_id":"INV-003","invoice_date":"2023-08-19","currency":"INR","place_of_supply":"09-Uttar Pradesh"},
+    "compliance":{"irn":"IRN003","ack_no":"ACK003","ack_date":"2023-08-19 09:25:00","qr_code_data":"QR003"},
+    "supplier":{"gstin":"09ABCDE9999F1Z2","pan":"ABCDE9999F","name":"Noida Electronics","address":"Noida, UP"},
+    "recipient":{"gstin":"07QWERT1234A1Z9","pan":"QWERT1234A","name":"Delhi IT Solutions","address":"New Delhi"},
+    "items":[{"item_id":1,"description":"Computer Servers","hsn_sac":"8471","quantity":3,"uom":"NOS","unit_price":190000,"taxable_value":570000,"gst_rate":18,"cgst_amount":51300,"sgst_amount":51300,"igst_amount":0}],
+    "totals":{"total_taxable_value":570000,"cgst_total":51300,"sgst_total":51300,"igst_total":0,"tax_total":102600,"grand_total":672600}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-004","invoice_date":"2023-10-11","currency":"INR","place_of_supply":"19-West Bengal"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2023-10-11 15:30:00","qr_code_data":null},
+    "supplier":{"gstin":"19ASDFG4321H1Z2","pan":"ASDFG4321H","name":"Kolkata Hardware","address":"Kolkata, WB"},
+    "recipient":{"gstin":"21ZXCVB6789M1Z4","pan":"ZXCVB6789M","name":"Odisha Infra Ltd","address":"Bhubaneswar, Odisha"},
+    "items":[{"item_id":1,"description":"Industrial Bolts","hsn_sac":"7318","quantity":5000,"uom":"NOS","unit_price":12,"taxable_value":60000,"gst_rate":18,"cgst_amount":5400,"sgst_amount":5400,"igst_amount":0}],
+    "totals":{"total_taxable_value":60000,"cgst_total":5400,"sgst_total":5400,"igst_total":0,"tax_total":10800,"grand_total":70800}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-005","invoice_date":"2024-01-08","currency":"INR","place_of_supply":"06-Haryana"},
+    "compliance":{"irn":"IRN005","ack_no":"ACK005","ack_date":"2024-01-08 11:00:00","qr_code_data":"QR005"},
+    "supplier":{"gstin":"06HJKLO9876P1Z9","pan":"HJKLO9876P","name":"Gurgaon Plastics","address":"Gurgaon, Haryana"},
+    "recipient":{"gstin":"08MNBVC4321Q1Z6","pan":"MNBVC4321Q","name":"Jaipur Packaging","address":"Jaipur, Rajasthan"},
+    "items":[{"item_id":1,"description":"Plastic Granules","hsn_sac":"3901","quantity":2000,"uom":"KG","unit_price":78,"taxable_value":156000,"gst_rate":18,"cgst_amount":14040,"sgst_amount":14040,"igst_amount":0}],
+    "totals":{"total_taxable_value":156000,"cgst_total":14040,"sgst_total":14040,"igst_total":0,"tax_total":28080,"grand_total":184080}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-016","invoice_date":"2023-05-12","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2023-05-12 09:10:00","qr_code_data":null},
+    "supplier":{"gstin":"27AAAAA1111A1Z1","pan":"AAAAA1111A","name":"Om Traders","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27BBBBB2222B1Z2","pan":"BBBBB2222B","name":"Sai Distributors","address":"Thane, Maharashtra"},
+    "items":[{"item_id":1,"description":"Electrical Switches","hsn_sac":"8536","quantity":250,"uom":"NOS","unit_price":190,"taxable_value":47500,"gst_rate":18,"cgst_amount":4275,"sgst_amount":4275,"igst_amount":0}],
+    "totals":{"total_taxable_value":47500,"cgst_total":4275,"sgst_total":4275,"igst_total":0,"tax_total":8550,"grand_total":56050}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-017","invoice_date":"2023-08-22","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2023-08-22 14:00:00","qr_code_data":null},
+    "supplier":{"gstin":"27AAAAA1111A1Z1","pan":"AAAAA1111A","name":"Om Traders","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27BBBBB2222B1Z2","pan":"BBBBB2222B","name":"Sai Distributors","address":"Thane, Maharashtra"},
+    "items":[{"item_id":1,"description":"Electrical Switches","hsn_sac":"8536","quantity":400,"uom":"NOS","unit_price":230,"taxable_value":92000,"gst_rate":18,"cgst_amount":8280,"sgst_amount":8280,"igst_amount":0}],
+    "totals":{"total_taxable_value":92000,"cgst_total":8280,"sgst_total":8280,"igst_total":0,"tax_total":16560,"grand_total":108560}
+  },
+
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-008","invoice_date":"2023-11-15","currency":"INR","place_of_supply":"23-Madhya Pradesh"},
+    "compliance":{"irn":"IRN008","ack_no":"ACK008","ack_date":"2023-11-15 10:30:00","qr_code_data":"QR008"},
+    "supplier":{"gstin":"23QAZWS9876E1Z4","pan":"QAZWS9876E","name":"Indore Steel Traders","address":"Indore, MP"},
+    "recipient":{"gstin":"22EDCRF5432T1Z7","pan":"EDCRF5432T","name":"Raipur Construction","address":"Raipur, Chhattisgarh"},
+    "items":[{"item_id":1,"description":"TMT Steel Bars","hsn_sac":"7214","quantity":1800,"uom":"KG","unit_price":56,"taxable_value":100800,"gst_rate":18,"cgst_amount":9072,"sgst_amount":9072,"igst_amount":0}],
+    "totals":{"total_taxable_value":100800,"cgst_total":9072,"sgst_total":9072,"igst_total":0,"tax_total":18144,"grand_total":118944}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-009","invoice_date":"2024-02-03","currency":"INR","place_of_supply":"10-Bihar"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2024-02-03 13:20:00","qr_code_data":null},
+    "supplier":{"gstin":"10PLMKO4567S1Z8","pan":"PLMKO4567S","name":"Patna Electricals","address":"Patna, Bihar"},
+    "recipient":{"gstin":"34TYUIO1122P1Z9","pan":"TYUIO1122P","name":"Port Blair Services","address":"Port Blair, Andaman"},
+    "items":[{"item_id":1,"description":"Copper Wiring","hsn_sac":"7408","quantity":600,"uom":"MTR","unit_price":145,"taxable_value":87000,"gst_rate":18,"cgst_amount":7830,"sgst_amount":7830,"igst_amount":0}],
+    "totals":{"total_taxable_value":87000,"cgst_total":7830,"sgst_total":7830,"igst_total":0,"tax_total":15660,"grand_total":102660}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_ORACLE","is_einvoice":true},
+    "header":{"invoice_id":"INV-010","invoice_date":"2023-07-09","currency":"INR","place_of_supply":"08-Rajasthan"},
+    "compliance":{"irn":"IRN010","ack_no":"ACK010","ack_date":"2023-07-09 11:45:00","qr_code_data":"QR010"},
+    "supplier":{"gstin":"08LKJHG7654R1Z3","pan":"LKJHG7654R","name":"Jaipur Chemicals","address":"Jaipur, Rajasthan"},
+    "recipient":{"gstin":"02BNMVC9988D1Z6","pan":"BNMVC9988D","name":"Shimla Paints","address":"Shimla, Himachal Pradesh"},
+    "items":[{"item_id":1,"description":"Industrial Solvents","hsn_sac":"3814","quantity":1200,"uom":"LTR","unit_price":68,"taxable_value":81600,"gst_rate":18,"cgst_amount":7344,"sgst_amount":7344,"igst_amount":0}],
+    "totals":{"total_taxable_value":81600,"cgst_total":7344,"sgst_total":7344,"igst_total":0,"tax_total":14688,"grand_total":96288}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-011","invoice_date":"2024-03-19","currency":"INR","place_of_supply":"18-Assam"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2024-03-19 16:10:00","qr_code_data":null},
+    "supplier":{"gstin":"18POIUY3344L1Z2","pan":"POIUY3344L","name":"Guwahati Timber","address":"Guwahati, Assam"},
+    "recipient":{"gstin":"16ASDFG5566M1Z5","pan":"ASDFG5566M","name":"Imphal Furnitures","address":"Imphal, Manipur"},
+    "items":[{"item_id":1,"description":"Plywood Sheets","hsn_sac":"4412","quantity":300,"uom":"NOS","unit_price":850,"taxable_value":255000,"gst_rate":18,"cgst_amount":22950,"sgst_amount":22950,"igst_amount":0}],
+    "totals":{"total_taxable_value":255000,"cgst_total":22950,"sgst_total":22950,"igst_total":0,"tax_total":45900,"grand_total":300900}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-012","invoice_date":"2023-12-07","currency":"INR","place_of_supply":"20-Jharkhand"},
+    "compliance":{"irn":"IRN012","ack_no":"ACK012","ack_date":"2023-12-07 10:00:00","qr_code_data":"QR012"},
+    "supplier":{"gstin":"20ZXCAS1122B1Z8","pan":"ZXCAS1122B","name":"Ranchi Mining Equip","address":"Ranchi, Jharkhand"},
+    "recipient":{"gstin":"15MNBVC7788C1Z1","pan":"MNBVC7788C","name":"Aizawl Infra","address":"Aizawl, Mizoram"},
+    "items":[{"item_id":1,"description":"Mining Drill Bits","hsn_sac":"8207","quantity":40,"uom":"NOS","unit_price":6200,"taxable_value":248000,"gst_rate":18,"cgst_amount":22320,"sgst_amount":22320,"igst_amount":0}],
+    "totals":{"total_taxable_value":248000,"cgst_total":22320,"sgst_total":22320,"igst_total":0,"tax_total":44640,"grand_total":292640}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-013","invoice_date":"2023-09-14","currency":"INR","place_of_supply":"32-Kerala"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2023-09-14 14:35:00","qr_code_data":null},
+    "supplier":{"gstin":"32QWERT6655E1Z9","pan":"QWERT6655E","name":"Kochi Marine Supplies","address":"Kochi, Kerala"},
+    "recipient":{"gstin":"31ZXCVB4433N1Z7","pan":"ZXCVB4433N","name":"Lakshadweep Ports","address":"Kavaratti"},
+    "items":[{"item_id":1,"description":"Marine Paint","hsn_sac":"3208","quantity":220,"uom":"LTR","unit_price":980,"taxable_value":215600,"gst_rate":18,"cgst_amount":19404,"sgst_amount":19404,"igst_amount":0}],
+    "totals":{"total_taxable_value":215600,"cgst_total":19404,"sgst_total":19404,"igst_total":0,"tax_total":38808,"grand_total":254408}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-014","invoice_date":"2024-04-02","currency":"INR","place_of_supply":"30-Goa"},
+    "compliance":{"irn":"IRN014","ack_no":"ACK014","ack_date":"2024-04-02 11:15:00","qr_code_data":"QR014"},
+    "supplier":{"gstin":"30MJKLO9988F1Z4","pan":"MJKLO9988F","name":"Goa Hospitality Equip","address":"Panaji, Goa"},
+    "recipient":{"gstin":"27HGFDS3322R1Z2","pan":"HGFDS3322R","name":"Mumbai Resorts Ltd","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Commercial Refrigerators","hsn_sac":"8418","quantity":4,"uom":"NOS","unit_price":125000,"taxable_value":500000,"gst_rate":18,"cgst_amount":45000,"sgst_amount":45000,"igst_amount":0}],
+    "totals":{"total_taxable_value":500000,"cgst_total":45000,"sgst_total":45000,"igst_total":0,"tax_total":90000,"grand_total":590000}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-015","invoice_date":"2023-06-28","currency":"INR","place_of_supply":"01-Jammu & Kashmir"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2023-06-28 10:05:00","qr_code_data":null},
+    "supplier":{"gstin":"01LKJHG1122D1Z6","pan":"LKJHG1122D","name":"Srinagar Handicrafts","address":"Srinagar, J&K"},
+    "recipient":{"gstin":"03QAZWS3344A1Z8","pan":"QAZWS3344A","name":"Amritsar Exports","address":"Amritsar, Punjab"},
+    "items":[{"item_id":1,"description":"Woollen Carpets","hsn_sac":"5701","quantity":90,"uom":"NOS","unit_price":4200,"taxable_value":378000,"gst_rate":12,"cgst_amount":22680,"sgst_amount":22680,"igst_amount":0}],
+    "totals":{"total_taxable_value":378000,"cgst_total":22680,"sgst_total":22680,"igst_total":0,"tax_total":45360,"grand_total":423360}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-018","invoice_date":"2023-11-30","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2023-11-30 09:00:00","qr_code_data":null},
+    "supplier":{"gstin":"27AAAAA1111A1Z1","pan":"AAAAA1111A","name":"Om Traders","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27BBBBB2222B1Z2","pan":"BBBBB2222B","name":"Sai Distributors","address":"Thane, Maharashtra"},
+    "items":[{"item_id":1,"description":"Electrical Switches","hsn_sac":"8536","quantity":150,"uom":"NOS","unit_price":260,"taxable_value":39000,"gst_rate":18,"cgst_amount":3510,"sgst_amount":3510,"igst_amount":0}],
+    "totals":{"total_taxable_value":39000,"cgst_total":3510,"sgst_total":3510,"igst_total":0,"tax_total":7020,"grand_total":46020}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-019","invoice_date":"2024-03-05","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2024-03-05 15:10:00","qr_code_data":null},
+    "supplier":{"gstin":"27AAAAA1111A1Z1","pan":"AAAAA1111A","name":"Om Traders","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27BBBBB2222B1Z2","pan":"BBBBB2222B","name":"Sai Distributors","address":"Thane, Maharashtra"},
+    "items":[{"item_id":1,"description":"Electrical Switches","hsn_sac":"8536","quantity":500,"uom":"NOS","unit_price":180,"taxable_value":90000,"gst_rate":18,"cgst_amount":8100,"sgst_amount":8100,"igst_amount":0}],
+    "totals":{"total_taxable_value":90000,"cgst_total":8100,"sgst_total":8100,"igst_total":0,"tax_total":16200,"grand_total":106200}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-020","invoice_date":"2024-06-01","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2024-06-01 12:30:00","qr_code_data":null},
+    "supplier":{"gstin":"27AAAAA1111A1Z1","pan":"AAAAA1111A","name":"Om Traders","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27BBBBB2222B1Z2","pan":"BBBBB2222B","name":"Sai Distributors","address":"Thane, Maharashtra"},
+    "items":[{"item_id":1,"description":"Electrical Switches","hsn_sac":"8536","quantity":320,"uom":"NOS","unit_price":240,"taxable_value":76800,"gst_rate":18,"cgst_amount":6912,"sgst_amount":6912,"igst_amount":0}],
+    "totals":{"total_taxable_value":76800,"cgst_total":6912,"sgst_total":6912,"igst_total":0,"tax_total":13824,"grand_total":90624}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-021","invoice_date":"2024-08-18","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2024-08-18 10:40:00","qr_code_data":null},
+    "supplier":{"gstin":"27AAAAA1111A1Z1","pan":"AAAAA1111A","name":"Om Traders","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27BBBBB2222B1Z2","pan":"BBBBB2222B","name":"Sai Distributors","address":"Thane, Maharashtra"},
+    "items":[{"item_id":1,"description":"Electrical Switches","hsn_sac":"8536","quantity":610,"uom":"NOS","unit_price":165,"taxable_value":100650,"gst_rate":18,"cgst_amount":9058.5,"sgst_amount":9058.5,"igst_amount":0}],
+    "totals":{"total_taxable_value":100650,"cgst_total":9058.5,"sgst_total":9058.5,"igst_total":0,"tax_total":18117,"grand_total":118767}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-022","invoice_date":"2023-04-09","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2023-04-09 09:55:00","qr_code_data":null},
+    "supplier":{"gstin":"27AAAAA1111A1Z1","pan":"AAAAA1111A","name":"Om Traders","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27BBBBB2222B1Z2","pan":"BBBBB2222B","name":"Sai Distributors","address":"Thane, Maharashtra"},
+    "items":[{"item_id":1,"description":"Electrical Switches","hsn_sac":"8536","quantity":200,"uom":"NOS","unit_price":215,"taxable_value":43000,"gst_rate":18,"cgst_amount":3870,"sgst_amount":3870,"igst_amount":0}],
+    "totals":{"total_taxable_value":43000,"cgst_total":3870,"sgst_total":3870,"igst_total":0,"tax_total":7740,"grand_total":50740}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-023","invoice_date":"2023-12-21","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2023-12-21 16:45:00","qr_code_data":null},
+    "supplier":{"gstin":"27AAAAA1111A1Z1","pan":"AAAAA1111A","name":"Om Traders","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27BBBBB2222B1Z2","pan":"BBBBB2222B","name":"Sai Distributors","address":"Thane, Maharashtra"},
+    "items":[{"item_id":1,"description":"Electrical Switches","hsn_sac":"8536","quantity":450,"uom":"NOS","unit_price":205,"taxable_value":92250,"gst_rate":18,"cgst_amount":8302.5,"sgst_amount":8302.5,"igst_amount":0}],
+    "totals":{"total_taxable_value":92250,"cgst_total":8302.5,"sgst_total":8302.5,"igst_total":0,"tax_total":16605,"grand_total":108855}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-024","invoice_date":"2024-01-27","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2024-01-27 11:20:00","qr_code_data":null},
+    "supplier":{"gstin":"27AAAAA1111A1Z1","pan":"AAAAA1111A","name":"Om Traders","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27BBBBB2222B1Z2","pan":"BBBBB2222B","name":"Sai Distributors","address":"Thane, Maharashtra"},
+    "items":[{"item_id":1,"description":"Electrical Switches","hsn_sac":"8536","quantity":380,"uom":"NOS","unit_price":225,"taxable_value":85500,"gst_rate":18,"cgst_amount":7695,"sgst_amount":7695,"igst_amount":0}],
+    "totals":{"total_taxable_value":85500,"cgst_total":7695,"sgst_total":7695,"igst_total":0,"tax_total":15390,"grand_total":100890}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-025","invoice_date":"2024-05-14","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2024-05-14 10:05:00","qr_code_data":null},
+    "supplier":{"gstin":"27AAAAA1111A1Z1","pan":"AAAAA1111A","name":"Om Traders","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27BBBBB2222B1Z2","pan":"BBBBB2222B","name":"Sai Distributors","address":"Thane, Maharashtra"},
+    "items":[{"item_id":1,"description":"Electrical Switches","hsn_sac":"8536","quantity":520,"uom":"NOS","unit_price":175,"taxable_value":91000,"gst_rate":18,"cgst_amount":8190,"sgst_amount":8190,"igst_amount":0}],
+    "totals":{"total_taxable_value":91000,"cgst_total":8190,"sgst_total":8190,"igst_total":0,"tax_total":16380,"grand_total":107380}
+  },
+
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-026","invoice_date":"2024-07-02","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN026","ack_no":"ACK026","ack_date":"2024-07-02 10:00:00","qr_code_data":"QR026"},
+    "supplier":{"gstin":"27CIRCU1111A1Z1","pan":"CIRCU1111A","name":"Alpha Metals","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27CIRCU2222B1Z2","pan":"CIRCU2222B","name":"Beta Steels","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Steel Scrap","hsn_sac":"7204","quantity":1000,"uom":"KG","unit_price":50,"taxable_value":50000,"gst_rate":18,"cgst_amount":4500,"sgst_amount":4500,"igst_amount":0}],
+    "totals":{"total_taxable_value":50000,"cgst_total":4500,"sgst_total":4500,"igst_total":0,"tax_total":9000,"grand_total":59000}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-027","invoice_date":"2024-07-04","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN027","ack_no":"ACK027","ack_date":"2024-07-04 11:10:00","qr_code_data":"QR027"},
+    "supplier":{"gstin":"27CIRCU2222B1Z2","pan":"CIRCU2222B","name":"Beta Steels","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27CIRCU3333C1Z3","pan":"CIRCU3333C","name":"Gamma Traders","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Steel Scrap","hsn_sac":"7204","quantity":990,"uom":"KG","unit_price":51,"taxable_value":50490,"gst_rate":18,"cgst_amount":4544.1,"sgst_amount":4544.1,"igst_amount":0}],
+    "totals":{"total_taxable_value":50490,"cgst_total":4544.1,"sgst_total":4544.1,"igst_total":0,"tax_total":9088.2,"grand_total":59578.2}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-028","invoice_date":"2024-07-06","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN028","ack_no":"ACK028","ack_date":"2024-07-06 12:30:00","qr_code_data":"QR028"},
+    "supplier":{"gstin":"27CIRCU3333C1Z3","pan":"CIRCU3333C","name":"Gamma Traders","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27CIRCU1111A1Z1","pan":"CIRCU1111A","name":"Alpha Metals","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Steel Scrap","hsn_sac":"7204","quantity":995,"uom":"KG","unit_price":50.5,"taxable_value":50247.5,"gst_rate":18,"cgst_amount":4522.275,"sgst_amount":4522.275,"igst_amount":0}],
+    "totals":{"total_taxable_value":50247.5,"cgst_total":4522.275,"sgst_total":4522.275,"igst_total":0,"tax_total":9044.55,"grand_total":59292.05}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-029","invoice_date":"2024-07-09","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN029","ack_no":"ACK029","ack_date":"2024-07-09 10:20:00","qr_code_data":"QR029"},
+    "supplier":{"gstin":"27CIRCU1111A1Z1","pan":"CIRCU1111A","name":"Alpha Metals","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27CIRCU2222B1Z2","pan":"CIRCU2222B","name":"Beta Steels","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Steel Scrap","hsn_sac":"7204","quantity":1010,"uom":"KG","unit_price":49.8,"taxable_value":50300,"gst_rate":18,"cgst_amount":4527,"sgst_amount":4527,"igst_amount":0}],
+    "totals":{"total_taxable_value":50300,"cgst_total":4527,"sgst_total":4527,"igst_total":0,"tax_total":9054,"grand_total":59354}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-030","invoice_date":"2024-07-11","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN030","ack_no":"ACK030","ack_date":"2024-07-11 11:40:00","qr_code_data":"QR030"},
+    "supplier":{"gstin":"27CIRCU2222B1Z2","pan":"CIRCU2222B","name":"Beta Steels","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27CIRCU3333C1Z3","pan":"CIRCU3333C","name":"Gamma Traders","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Steel Scrap","hsn_sac":"7204","quantity":1005,"uom":"KG","unit_price":50.2,"taxable_value":50451,"gst_rate":18,"cgst_amount":4540.59,"sgst_amount":4540.59,"igst_amount":0}],
+    "totals":{"total_taxable_value":50451,"cgst_total":4540.59,"sgst_total":4540.59,"igst_total":0,"tax_total":9081.18,"grand_total":59532.18}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-031","invoice_date":"2024-07-13","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN031","ack_no":"ACK031","ack_date":"2024-07-13 10:15:00","qr_code_data":"QR031"},
+    "supplier":{"gstin":"27CIRCU3333C1Z3","pan":"CIRCU3333C","name":"Gamma Traders","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27CIRCU1111A1Z1","pan":"CIRCU1111A","name":"Alpha Metals","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Steel Scrap","hsn_sac":"7204","quantity":1002,"uom":"KG","unit_price":50.1,"taxable_value":50220,"gst_rate":18,"cgst_amount":4519.8,"sgst_amount":4519.8,"igst_amount":0}],
+    "totals":{"total_taxable_value":50220,"cgst_total":4519.8,"sgst_total":4519.8,"igst_total":0,"tax_total":9039.6,"grand_total":59259.6}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-032","invoice_date":"2024-07-15","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN032","ack_no":"ACK032","ack_date":"2024-07-15 11:20:00","qr_code_data":"QR032"},
+    "supplier":{"gstin":"27CIRCU1111A1Z1","pan":"CIRCU1111A","name":"Alpha Metals","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27CIRCU2222B1Z2","pan":"CIRCU2222B","name":"Beta Steels","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Steel Scrap","hsn_sac":"7204","quantity":995,"uom":"KG","unit_price":50.3,"taxable_value":50048.5,"gst_rate":18,"cgst_amount":4504.365,"sgst_amount":4504.365,"igst_amount":0}],
+    "totals":{"total_taxable_value":50048.5,"cgst_total":4504.365,"sgst_total":4504.365,"igst_total":0,"tax_total":9008.73,"grand_total":59057.23}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-033","invoice_date":"2024-07-17","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN033","ack_no":"ACK033","ack_date":"2024-07-17 10:05:00","qr_code_data":"QR033"},
+    "supplier":{"gstin":"27CIRCU2222B1Z2","pan":"CIRCU2222B","name":"Beta Steels","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27CIRCU3333C1Z3","pan":"CIRCU3333C","name":"Gamma Traders","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Steel Scrap","hsn_sac":"7204","quantity":1008,"uom":"KG","unit_price":49.9,"taxable_value":50300,"gst_rate":18,"cgst_amount":4527,"sgst_amount":4527,"igst_amount":0}],
+    "totals":{"total_taxable_value":50300,"cgst_total":4527,"sgst_total":4527,"igst_total":0,"tax_total":9054,"grand_total":59354}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-034","invoice_date":"2024-07-19","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN034","ack_no":"ACK034","ack_date":"2024-07-19 11:35:00","qr_code_data":"QR034"},
+    "supplier":{"gstin":"27CIRCU3333C1Z3","pan":"CIRCU3333C","name":"Gamma Traders","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27CIRCU1111A1Z1","pan":"CIRCU1111A","name":"Alpha Metals","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Steel Scrap","hsn_sac":"7204","quantity":1001,"uom":"KG","unit_price":50.0,"taxable_value":50050,"gst_rate":18,"cgst_amount":4504.5,"sgst_amount":4504.5,"igst_amount":0}],
+    "totals":{"total_taxable_value":50050,"cgst_total":4504.5,"sgst_total":4504.5,"igst_total":0,"tax_total":9009,"grand_total":59059}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-035","invoice_date":"2024-07-21","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN035","ack_no":"ACK035","ack_date":"2024-07-21 10:50:00","qr_code_data":"QR035"},
+    "supplier":{"gstin":"27CIRCU1111A1Z1","pan":"CIRCU1111A","name":"Alpha Metals","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27CIRCU2222B1Z2","pan":"CIRCU2222B","name":"Beta Steels","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Steel Scrap","hsn_sac":"7204","quantity":1003,"uom":"KG","unit_price":49.7,"taxable_value":49849.1,"gst_rate":18,"cgst_amount":4486.419,"sgst_amount":4486.419,"igst_amount":0}],
+    "totals":{"total_taxable_value":49849.1,"cgst_total":4486.419,"sgst_total":4486.419,"igst_total":0,"tax_total":8972.838,"grand_total":58821.938}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-036","invoice_date":"2024-07-22","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN036","ack_no":"ACK036","ack_date":"2024-07-22 09:45:00","qr_code_data":"QR036"},
+    "supplier":{"gstin":"27PANFR1111A1Z1","pan":"PANFR1111A","name":"Rapid Metals","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27PANFR2222A1Z2","pan":"PANFR1111A","name":"Rapid Steels","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Copper Scrap","hsn_sac":"7404","quantity":5000,"uom":"KG","unit_price":620,"taxable_value":3100000,"gst_rate":18,"cgst_amount":279000,"sgst_amount":279000,"igst_amount":0}],
+    "totals":{"total_taxable_value":3100000,"cgst_total":279000,"sgst_total":279000,"igst_total":0,"tax_total":558000,"grand_total":3658000}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-037","invoice_date":"2024-07-23","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN037","ack_no":"ACK037","ack_date":"2024-07-23 10:10:00","qr_code_data":"QR037"},
+    "supplier":{"gstin":"27PANFR2222A1Z2","pan":"PANFR1111A","name":"Rapid Steels","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27PANFR3333A1Z3","pan":"PANFR1111A","name":"Rapid Traders","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Copper Scrap","hsn_sac":"7404","quantity":4980,"uom":"KG","unit_price":618,"taxable_value":3077640,"gst_rate":18,"cgst_amount":276987.6,"sgst_amount":276987.6,"igst_amount":0}],
+    "totals":{"total_taxable_value":3077640,"cgst_total":276987.6,"sgst_total":276987.6,"igst_total":0,"tax_total":553975.2,"grand_total":3631615.2}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-038","invoice_date":"2024-07-24","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN038","ack_no":"ACK038","ack_date":"2024-07-24 10:40:00","qr_code_data":"QR038"},
+    "supplier":{"gstin":"27PANFR3333A1Z3","pan":"PANFR1111A","name":"Rapid Traders","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27PANFR1111A1Z1","pan":"PANFR1111A","name":"Rapid Metals","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Copper Scrap","hsn_sac":"7404","quantity":4960,"uom":"KG","unit_price":620,"taxable_value":3075200,"gst_rate":18,"cgst_amount":276768,"sgst_amount":276768,"igst_amount":0}],
+    "totals":{"total_taxable_value":3075200,"cgst_total":276768,"sgst_total":276768,"igst_total":0,"tax_total":553536,"grand_total":3628736}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-039","invoice_date":"2024-07-25","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN039","ack_no":"ACK039","ack_date":"2024-07-25 09:30:00","qr_code_data":"QR039"},
+    "supplier":{"gstin":"27PANFR1111A1Z1","pan":"PANFR1111A","name":"Rapid Metals","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27PANFR2222A1Z2","pan":"PANFR1111A","name":"Rapid Steels","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Copper Scrap","hsn_sac":"7404","quantity":5000,"uom":"KG","unit_price":620,"taxable_value":3100000,"gst_rate":18,"cgst_amount":279000,"sgst_amount":279000,"igst_amount":0}],
+    "totals":{"total_taxable_value":3100000,"cgst_total":279000,"sgst_total":279000,"igst_total":0,"tax_total":558000,"grand_total":3658000}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-040","invoice_date":"2024-07-26","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN040","ack_no":"ACK040","ack_date":"2024-07-26 11:00:00","qr_code_data":"QR040"},
+    "supplier":{"gstin":"27PANFR2222A1Z2","pan":"PANFR1111A","name":"Rapid Steels","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27PANFR3333A1Z3","pan":"PANFR1111A","name":"Rapid Traders","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Copper Scrap","hsn_sac":"7404","quantity":5000,"uom":"KG","unit_price":619.5,"taxable_value":3097500,"gst_rate":18,"cgst_amount":278775,"sgst_amount":278775,"igst_amount":0}],
+    "totals":{"total_taxable_value":3097500,"cgst_total":278775,"sgst_total":278775,"igst_total":0,"tax_total":557550,"grand_total":3655050}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-041","invoice_date":"2024-04-10","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2024-04-10 10:10:00","qr_code_data":null},
+    "supplier":{"gstin":"27ROUND1111X1Z9","pan":"ROUND1111X","name":"RoundTrade A","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27ROUND2222X1Z8","pan":"ROUND2222X","name":"RoundTrade B","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Aluminium Sheets","hsn_sac":"7606","quantity":100,"uom":"NOS","unit_price":10000,"taxable_value":1000000,"gst_rate":18,"cgst_amount":90000,"sgst_amount":90000,"igst_amount":0}],
+    "totals":{"total_taxable_value":1000000,"cgst_total":90000,"sgst_total":90000,"igst_total":0,"tax_total":180000,"grand_total":1180000}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-042","invoice_date":"2024-04-12","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2024-04-12 11:30:00","qr_code_data":null},
+    "supplier":{"gstin":"27ROUND2222X1Z8","pan":"ROUND2222X","name":"RoundTrade B","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27ROUND3333X1Z7","pan":"ROUND3333X","name":"RoundTrade C","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Aluminium Sheets","hsn_sac":"7606","quantity":100,"uom":"NOS","unit_price":10000,"taxable_value":1000000,"gst_rate":18,"cgst_amount":90000,"sgst_amount":90000,"igst_amount":0}],
+    "totals":{"total_taxable_value":1000000,"cgst_total":90000,"sgst_total":90000,"igst_total":0,"tax_total":180000,"grand_total":1180000}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-043","invoice_date":"2024-04-14","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2024-04-14 09:50:00","qr_code_data":null},
+    "supplier":{"gstin":"27ROUND3333X1Z7","pan":"ROUND3333X","name":"RoundTrade C","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27ROUND1111X1Z9","pan":"ROUND1111X","name":"RoundTrade A","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Aluminium Sheets","hsn_sac":"7606","quantity":100,"uom":"NOS","unit_price":9995,"taxable_value":999500,"gst_rate":18,"cgst_amount":89955,"sgst_amount":89955,"igst_amount":0}],
+    "totals":{"total_taxable_value":999500,"cgst_total":89955,"sgst_total":89955,"igst_total":0,"tax_total":179910,"grand_total":1179410}
+  },
+
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-051","invoice_date":"2024-02-05","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN051","ack_no":"ACK051","ack_date":"2024-02-05 10:00:00","qr_code_data":"QR051"},
+    "supplier":{"gstin":"27HUBAA1111A1Z1","pan":"HUBAA1111A","name":"Hub Industries","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27NODEB2222B1Z2","pan":"NODEB2222B","name":"Node Traders B","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Industrial Bearings","hsn_sac":"8482","quantity":120,"uom":"NOS","unit_price":5200,"taxable_value":624000,"gst_rate":18,"cgst_amount":56160,"sgst_amount":56160,"igst_amount":0}],
+    "totals":{"total_taxable_value":624000,"cgst_total":56160,"sgst_total":56160,"igst_total":0,"tax_total":112320,"grand_total":736320}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-052","invoice_date":"2024-02-06","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN052","ack_no":"ACK052","ack_date":"2024-02-06 11:10:00","qr_code_data":"QR052"},
+    "supplier":{"gstin":"27HUBAA1111A1Z1","pan":"HUBAA1111A","name":"Hub Industries","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27NODEC3333C1Z3","pan":"NODEC3333C","name":"Node Traders C","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Industrial Bearings","hsn_sac":"8482","quantity":115,"uom":"NOS","unit_price":5300,"taxable_value":609500,"gst_rate":18,"cgst_amount":54855,"sgst_amount":54855,"igst_amount":0}],
+    "totals":{"total_taxable_value":609500,"cgst_total":54855,"sgst_total":54855,"igst_total":0,"tax_total":109710,"grand_total":719210}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-053","invoice_date":"2024-02-07","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN053","ack_no":"ACK053","ack_date":"2024-02-07 12:00:00","qr_code_data":"QR053"},
+    "supplier":{"gstin":"27NODEB2222B1Z2","pan":"NODEB2222B","name":"Node Traders B","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27NODEC3333C1Z3","pan":"NODEC3333C","name":"Node Traders C","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Industrial Bearings","hsn_sac":"8482","quantity":110,"uom":"NOS","unit_price":5250,"taxable_value":577500,"gst_rate":18,"cgst_amount":51975,"sgst_amount":51975,"igst_amount":0}],
+    "totals":{"total_taxable_value":577500,"cgst_total":51975,"sgst_total":51975,"igst_total":0,"tax_total":103950,"grand_total":681450}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-054","invoice_date":"2024-01-18","currency":"INR","place_of_supply":"09-Uttar Pradesh"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2024-01-18 09:30:00","qr_code_data":null},
+    "supplier":{"gstin":"09VAGUE1111X1Z5","pan":"VAGUE1111X","name":"North Supplies","address":"Kanpur, UP"},
+    "recipient":{"gstin":"07BUYER2222Y1Z6","pan":"BUYER2222Y","name":"Delhi Retail Hub","address":"Delhi"},
+    "items":[{"item_id":1,"description":"Goods","hsn_sac":"8471","quantity":1,"uom":"NOS","unit_price":850000,"taxable_value":850000,"gst_rate":18,"cgst_amount":76500,"sgst_amount":76500,"igst_amount":0}],
+    "totals":{"total_taxable_value":850000,"cgst_total":76500,"sgst_total":76500,"igst_total":0,"tax_total":153000,"grand_total":1003000}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-055","invoice_date":"2024-01-20","currency":"INR","place_of_supply":"09-Uttar Pradesh"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2024-01-20 14:10:00","qr_code_data":null},
+    "supplier":{"gstin":"09VAGUE1111X1Z5","pan":"VAGUE1111X","name":"North Supplies","address":"Kanpur, UP"},
+    "recipient":{"gstin":"07BUYER3333Z1Z7","pan":"BUYER3333Z","name":"Capital Wholesale","address":"Delhi"},
+    "items":[{"item_id":1,"description":"Misc Items","hsn_sac":"8471","quantity":1,"uom":"NOS","unit_price":900000,"taxable_value":900000,"gst_rate":18,"cgst_amount":81000,"sgst_amount":81000,"igst_amount":0}],
+    "totals":{"total_taxable_value":900000,"cgst_total":81000,"sgst_total":81000,"igst_total":0,"tax_total":162000,"grand_total":1062000}
+  },
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-063","invoice_date":"2024-08-01","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN063","ack_no":"ACK063","ack_date":"2024-08-01 10:00:00","qr_code_data":"QR063"},
+    "supplier":{"gstin":"27TEMP1111A1Z1","pan":"TEMP1111A","name":"Tempo Traders","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27TEMP2222B1Z2","pan":"TEMP2222B","name":"Burst Buyers","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Industrial Fans","hsn_sac":"8414","quantity":50,"uom":"NOS","unit_price":18000,"taxable_value":900000,"gst_rate":18,"cgst_amount":81000,"sgst_amount":81000,"igst_amount":0}],
+    "totals":{"total_taxable_value":900000,"cgst_total":81000,"sgst_total":81000,"igst_total":0,"tax_total":162000,"grand_total":1062000}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-064","invoice_date":"2024-08-03","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN064","ack_no":"ACK064","ack_date":"2024-08-03 10:20:00","qr_code_data":"QR064"},
+    "supplier":{"gstin":"27TEMP1111A1Z1","pan":"TEMP1111A","name":"Tempo Traders","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27TEMP3333C1Z3","pan":"TEMP3333C","name":"Rapid Supplies","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Industrial Fans","hsn_sac":"8414","quantity":48,"uom":"NOS","unit_price":18500,"taxable_value":888000,"gst_rate":18,"cgst_amount":79920,"sgst_amount":79920,"igst_amount":0}],
+    "totals":{"total_taxable_value":888000,"cgst_total":79920,"sgst_total":79920,"igst_total":0,"tax_total":159840,"grand_total":1047840}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-065","invoice_date":"2024-08-06","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN065","ack_no":"ACK065","ack_date":"2024-08-06 09:40:00","qr_code_data":"QR065"},
+    "supplier":{"gstin":"27TEMP2222B1Z2","pan":"TEMP2222B","name":"Burst Buyers","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27TEMP1111A1Z1","pan":"TEMP1111A","name":"Tempo Traders","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Industrial Fans","hsn_sac":"8414","quantity":49,"uom":"NOS","unit_price":18200,"taxable_value":891800,"gst_rate":18,"cgst_amount":80262,"sgst_amount":80262,"igst_amount":0}],
+    "totals":{"total_taxable_value":891800,"cgst_total":80262,"sgst_total":80262,"igst_total":0,"tax_total":160524,"grand_total":1052324}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-066","invoice_date":"2024-03-28","currency":"INR","place_of_supply":"23-Madhya Pradesh"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2024-03-28 11:00:00","qr_code_data":null},
+    "supplier":{"gstin":"23SLEEP1111A1Z5","pan":"SLEEP1111A","name":"Dormant Infra","address":"Bhopal, MP"},
+    "recipient":{"gstin":"27CIRCU1111A1Z1","pan":"CIRCU1111A","name":"Alpha Metals","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Structural Steel","hsn_sac":"7216","quantity":3000,"uom":"KG","unit_price":260,"taxable_value":780000,"gst_rate":18,"cgst_amount":70200,"sgst_amount":70200,"igst_amount":0}],
+    "totals":{"total_taxable_value":780000,"cgst_total":70200,"sgst_total":70200,"igst_total":0,"tax_total":140400,"grand_total":920400}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-067","invoice_date":"2024-04-02","currency":"INR","place_of_supply":"23-Madhya Pradesh"},
+    "compliance":{"irn":"IRN067","ack_no":"ACK067","ack_date":"2024-04-02 10:10:00","qr_code_data":"QR067"},
+    "supplier":{"gstin":"23SLEEP1111A1Z5","pan":"SLEEP1111A","name":"Dormant Infra","address":"Bhopal, MP"},
+    "recipient":{"gstin":"27PANFR1111A1Z1","pan":"PANFR1111A","name":"Rapid Metals","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Structural Steel","hsn_sac":"7216","quantity":3200,"uom":"KG","unit_price":270,"taxable_value":864000,"gst_rate":18,"cgst_amount":77760,"sgst_amount":77760,"igst_amount":0}],
+    "totals":{"total_taxable_value":864000,"cgst_total":77760,"sgst_total":77760,"igst_total":0,"tax_total":155520,"grand_total":1019520}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-068","invoice_date":"2024-04-06","currency":"INR","place_of_supply":"23-Madhya Pradesh"},
+    "compliance":{"irn":"IRN068","ack_no":"ACK068","ack_date":"2024-04-06 09:30:00","qr_code_data":"QR068"},
+    "supplier":{"gstin":"23SLEEP1111A1Z5","pan":"SLEEP1111A","name":"Dormant Infra","address":"Bhopal, MP"},
+    "recipient":{"gstin":"27PANFR2222A1Z2","pan":"PANFR1111A","name":"Rapid Steels","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Structural Steel","hsn_sac":"7216","quantity":3100,"uom":"KG","unit_price":275,"taxable_value":852500,"gst_rate":18,"cgst_amount":76725,"sgst_amount":76725,"igst_amount":0}],
+    "totals":{"total_taxable_value":852500,"cgst_total":76725,"sgst_total":76725,"igst_total":0,"tax_total":153450,"grand_total":1005950}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-069","invoice_date":"2024-05-12","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN069","ack_no":"ACK069","ack_date":"2024-05-12 10:00:00","qr_code_data":"QR069"},
+    "supplier":{"gstin":"27MELT1111A1Z1","pan":"MELT1111A","name":"Melt Traders A","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27MELT2222B1Z2","pan":"MELT2222B","name":"Melt Traders B","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Plastic Granules","hsn_sac":"3901","quantity":2000,"uom":"KG","unit_price":95,"taxable_value":190000,"gst_rate":18,"cgst_amount":17100,"sgst_amount":17100,"igst_amount":0}],
+    "totals":{"total_taxable_value":190000,"cgst_total":17100,"sgst_total":17100,"igst_total":0,"tax_total":34200,"grand_total":224200}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-070","invoice_date":"2024-05-15","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN070","ack_no":"ACK070","ack_date":"2024-05-15 10:15:00","qr_code_data":"QR070"},
+    "supplier":{"gstin":"27MELT2222B1Z2","pan":"MELT2222B","name":"Melt Traders B","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27MELT3333C1Z3","pan":"MELT3333C","name":"Melt Traders C","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Electrical Cables","hsn_sac":"8544","quantity":1800,"uom":"MTR","unit_price":108,"taxable_value":194400,"gst_rate":18,"cgst_amount":17496,"sgst_amount":17496,"igst_amount":0}],
+    "totals":{"total_taxable_value":194400,"cgst_total":17496,"sgst_total":17496,"igst_total":0,"tax_total":34992,"grand_total":229392}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-071","invoice_date":"2024-05-18","currency":"INR","place_of_supply":"27-Maharashtra"},
+    "compliance":{"irn":"IRN071","ack_no":"ACK071","ack_date":"2024-05-18 10:25:00","qr_code_data":"QR071"},
+    "supplier":{"gstin":"27MELT3333C1Z3","pan":"MELT3333C","name":"Melt Traders C","address":"Mumbai, Maharashtra"},
+    "recipient":{"gstin":"27MELT1111A1Z1","pan":"MELT1111A","name":"Melt Traders A","address":"Mumbai, Maharashtra"},
+    "items":[{"item_id":1,"description":"Plastic Granules","hsn_sac":"3901","quantity":1950,"uom":"KG","unit_price":97,"taxable_value":189150,"gst_rate":18,"cgst_amount":17023.5,"sgst_amount":17023.5,"igst_amount":0}],
+    "totals":{"total_taxable_value":189150,"cgst_total":17023.5,"sgst_total":17023.5,"igst_total":0,"tax_total":34047,"grand_total":223197}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-072","invoice_date":"2024-06-02","currency":"INR","place_of_supply":"19-West Bengal"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2024-06-02 09:20:00","qr_code_data":null},
+    "supplier":{"gstin":"19EDGE1111A1Z4","pan":"EDGE1111A","name":"Edge Traders","address":"Kolkata, WB"},
+    "recipient":{"gstin":"19EDGE2222B1Z5","pan":"EDGE2222B","name":"Edge Buyers","address":"Kolkata, WB"},
+    "items":[{"item_id":1,"description":"Packaging Boxes","hsn_sac":"4819","quantity":10000,"uom":"NOS","unit_price":22,"taxable_value":220000,"gst_rate":12,"cgst_amount":13200,"sgst_amount":13200,"igst_amount":0}],
+    "totals":{"total_taxable_value":220000,"cgst_total":13200,"sgst_total":13200,"igst_total":0,"tax_total":26400,"grand_total":246400}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-073","invoice_date":"2024-06-05","currency":"INR","place_of_supply":"19-West Bengal"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2024-06-05 11:10:00","qr_code_data":null},
+    "supplier":{"gstin":"19EDGE2222B1Z5","pan":"EDGE2222B","name":"Edge Buyers","address":"Kolkata, WB"},
+    "recipient":{"gstin":"19EDGE3333C1Z6","pan":"EDGE3333C","name":"Edge Movers","address":"Kolkata, WB"},
+    "items":[{"item_id":1,"description":"Packaging Boxes","hsn_sac":"4819","quantity":10000,"uom":"NOS","unit_price":22,"taxable_value":220000,"gst_rate":12,"cgst_amount":13200,"sgst_amount":13200,"igst_amount":0}],
+    "totals":{"total_taxable_value":220000,"cgst_total":13200,"sgst_total":13200,"igst_total":0,"tax_total":26400,"grand_total":246400}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"TALLY","is_einvoice":false},
+    "header":{"invoice_id":"INV-074","invoice_date":"2024-06-08","currency":"INR","place_of_supply":"19-West Bengal"},
+    "compliance":{"irn":null,"ack_no":null,"ack_date":"2024-06-08 10:30:00","qr_code_data":null},
+    "supplier":{"gstin":"19EDGE3333C1Z6","pan":"EDGE3333C","name":"Edge Movers","address":"Kolkata, WB"},
+    "recipient":{"gstin":"19EDGE1111A1Z4","pan":"EDGE1111A","name":"Edge Traders","address":"Kolkata, WB"},
+    "items":[{"item_id":1,"description":"Packaging Boxes","hsn_sac":"4819","quantity":10000,"uom":"NOS","unit_price":21.8,"taxable_value":218000,"gst_rate":12,"cgst_amount":13080,"sgst_amount":13080,"igst_amount":0}],
+    "totals":{"total_taxable_value":218000,"cgst_total":13080,"sgst_total":13080,"igst_total":0,"tax_total":26160,"grand_total":244160}
+  },
+
+  {
+    "invoice_metadata":{"supply_type":"B2B","source_system":"ERP_SAP","is_einvoice":true},
+    "header":{"invoice_id":"INV-075","invoice_date":"2024-06-12","currency":"INR","place_of_supply":"19-West Bengal"},
+    "compliance":{"irn":"IRN075","ack_no":"ACK075","ack_date":"2024-06-12 09:50:00","qr_code_data":"QR075"},
+    "supplier":{"gstin":"19EDGE1111A1Z4","pan":"EDGE1111A","name":"Edge Traders","address":"Kolkata, WB"},
+    "recipient":{"gstin":"19EDGE2222B1Z5","pan":"EDGE2222B","name":"Edge Buyers","address":"Kolkata, WB"},
+    "items":[{"item_id":1,"description":"Packaging Boxes","hsn_sac":"4819","quantity":10000,"uom":"NOS","unit_price":22,"taxable_value":220000,"gst_rate":12,"cgst_amount":13200,"sgst_amount":13200,"igst_amount":0}],
+    "totals":{"total_taxable_value":220000,"cgst_total":13200,"sgst_total":13200,"igst_total":0,"tax_total":26400,"grand_total":246400}
+  }
+
+
+]

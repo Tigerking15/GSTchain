@@ -1,8 +1,9 @@
-# app/main.py
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import uuid, json, os
+from typing import List, Optional
+import uuid, json
 from datetime import datetime
+
 from app.normalize import canonicalize
 from app.crypto import encrypt_bytes
 from app.storage import upload_blob
@@ -10,58 +11,120 @@ from app.models import init_db, SessionLocal, InvoiceMeta
 from app.anchor import mock_anchor
 from app.graph import upsert_edge
 
+# --------------------------------------------------
+# App init
+# --------------------------------------------------
 app = FastAPI(title="GST Circular Trade Detector - Ingest API")
 init_db()
 
-class InvoiceIn(BaseModel):
+# --------------------------------------------------
+# SCHEMA (UPDATED TO YOUR NEW INVOICE FORMAT)
+# --------------------------------------------------
+
+class InvoiceMetadata(BaseModel):
+    supply_type: Optional[str] = "B2B"
+    source_system: Optional[str] = None
+    is_einvoice: Optional[bool] = False
+
+
+class Header(BaseModel):
     invoice_id: str
     invoice_date: str
-    supplier_gstin: str
-    recipient_gstin: str
-    supplier_pan: str = None
-    recipient_pan: str = None
-    supplier_name: str = None
-    recipient_name: str = None
-    supplier_address: str = None
-    recipient_address: str = None
-    items: list = []
-    total_value: float = 0.0
-    tax_total: float = 0.0
-    place_of_supply: str = None
-    supply_type: str = "B2B"
-    currency: str = "INR"
-    source_type: str = "API"
-    source_system: str = None
+    currency: Optional[str] = "INR"
+    place_of_supply: Optional[str] = None
+
+
+class Compliance(BaseModel):
+    irn: Optional[str] = None
+    ack_no: Optional[str] = None
+    ack_date: Optional[str] = None
+    qr_code_data: Optional[str] = None
+
+
+class Party(BaseModel):
+    gstin: str
+    pan: Optional[str] = None
+    name: Optional[str] = None
+    address: Optional[str] = None
+
+
+class Item(BaseModel):
+    item_id: Optional[int] = None
+    description: Optional[str] = None
+    hsn_sac: Optional[str] = None
+    quantity: Optional[float] = None
+    uom: Optional[str] = None
+    unit_price: Optional[float] = None
+    taxable_value: Optional[float] = None
+    gst_rate: Optional[float] = None
+    cgst_amount: Optional[float] = None
+    sgst_amount: Optional[float] = None
+    igst_amount: Optional[float] = None
+
+
+class Totals(BaseModel):
+    total_taxable_value: Optional[float] = 0.0
+    cgst_total: Optional[float] = 0.0
+    sgst_total: Optional[float] = 0.0
+    igst_total: Optional[float] = 0.0
+    tax_total: Optional[float] = 0.0
+    grand_total: Optional[float] = 0.0
+
+
+class InvoiceIn(BaseModel):
+    invoice_metadata: Optional[InvoiceMetadata] = None
+    header: Header
+    compliance: Optional[Compliance] = None
+    supplier: Party
+    recipient: Party
+    items: List[Item] = []
+    totals: Totals
+
+# --------------------------------------------------
+# API ENDPOINT
+# --------------------------------------------------
 
 @app.post("/invoices")
 def ingest_invoice(payload: InvoiceIn):
-    # add ingestion metadata
+
     ingest_meta = {
         "ingestion_id": str(uuid.uuid4()),
         "ingestion_timestamp": datetime.utcnow().isoformat() + "Z"
     }
+
     rec = payload.dict()
     rec.update(ingest_meta)
-    # canonicalize
+
+    # ---------------- Normalization ----------------
     try:
         canonical, serialized = canonicalize(rec)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Normalization failed: {e}")
 
     invoice_hash = canonical["metadata"]["invoice_hash"]
-    # encrypt blob
+
+    # ---------------- Encryption -------------------
     enc = encrypt_bytes(serialized)
-    # upload to MinIO
+
+    # ---------------- Object Storage ---------------
     key = f"{invoice_hash}.json.enc"
     obj_path = upload_blob(key, json.dumps(enc).encode("utf-8"))
     canonical["metadata"]["file_pointer"] = obj_path
 
-    # anchor (mock)
-    anchor_res = mock_anchor(invoice_hash, canonical["supplier"]["gstin"], canonical["recipient"]["gstin"], canonical["total_value"])
-    canonical["metadata"]["onchain_txid"] = anchor_res["txid"]
-    canonical["metadata"]["onchain_timestamp"] = datetime.utcfromtimestamp(anchor_res["timestamp"]).isoformat() + "Z"
+    # ---------------- Blockchain Anchor ------------
+    anchor_res = mock_anchor(
+        invoice_hash,
+        canonical["supplier"]["gstin"],
+        canonical["recipient"]["gstin"],
+        canonical["total_value"]
+    )
 
-    # persist metadata in Postgres
+    canonical["metadata"]["onchain_txid"] = anchor_res["txid"]
+    canonical["metadata"]["onchain_timestamp"] = (
+        datetime.utcfromtimestamp(anchor_res["timestamp"]).isoformat() + "Z"
+    )
+
+    # ---------------- Postgres ---------------------
     db = SessionLocal()
     meta = InvoiceMeta(
         id=str(uuid.uuid4()),
@@ -74,6 +137,7 @@ def ingest_invoice(payload: InvoiceIn):
         object_path=obj_path,
         onchain_txid=canonical["metadata"]["onchain_txid"]
     )
+
     try:
         db.add(meta)
         db.commit()
@@ -83,22 +147,25 @@ def ingest_invoice(payload: InvoiceIn):
     finally:
         db.close()
 
-    # create graph edge in Neo4j
+    # ---------------- Neo4j Graph ------------------
     try:
-        upsert_edge(canonical["supplier"]["gstin"], canonical["recipient"]["gstin"],
-                    invoice_hash, canonical["invoice_date"], canonical["total_value"],
-                    canonical["metadata"]["onchain_txid"], canonical["ingestion"]["ingestion_id"])
+        upsert_edge(
+            canonical["supplier"]["gstin"],
+            canonical["recipient"]["gstin"],
+            invoice_hash,
+            canonical["invoice_date"],
+            canonical["total_value"],
+            canonical["metadata"]["onchain_txid"],
+            canonical["ingestion"]["ingestion_id"]
+        )
     except Exception as e:
-        # log and continue: graph failure shouldn't block ingestion
         print("Graph write failed:", e)
 
-    # run quick rule checks (placeholder)
-    # e.g., duplicate invoice number across unrelated GSTINs -> later you can add queries
-    response = {
+    # ---------------- Response ---------------------
+    return {
         "status": "ingested",
         "ingestion_id": canonical["ingestion"]["ingestion_id"],
         "invoice_hash": invoice_hash,
         "onchain_txid": canonical["metadata"]["onchain_txid"],
         "object_path": obj_path
     }
-    return response
