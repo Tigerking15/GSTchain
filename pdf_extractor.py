@@ -1,6 +1,14 @@
 import pdfplumber
 import json
 import re
+import requests
+import time
+
+# ================= CONFIG =================
+API_URL = "http://127.0.0.1:8000/invoices"
+REQUEST_TIMEOUT = 10
+# ==========================================
+
 
 def process_invoice(pdf_path):
     all_text = ""
@@ -8,7 +16,10 @@ def process_invoice(pdf_path):
 
     with pdfplumber.open(pdf_path) as pdf:
         for page in pdf.pages:
-            all_text += page.extract_text() + "\n"
+            text = page.extract_text()
+            if text:
+                all_text += text + "\n"
+
             extracted_table = page.extract_table()
             if extracted_table:
                 table_raw_data.extend(extracted_table)
@@ -19,7 +30,7 @@ def process_invoice(pdf_path):
 
     raw_supply_type = find_val("Supply Type")
     is_einvoice_text = find_val("Is E-Invoice")
-    
+
     final_supply_type = raw_supply_type
     if is_einvoice_text and is_einvoice_text.lower() == "yes":
         final_supply_type = "E-INV"
@@ -28,7 +39,7 @@ def process_invoice(pdf_path):
         "invoice_metadata": {
             "supply_type": final_supply_type,
             "source_system": find_val("Source System"),
-            "is_einvoice": True if is_einvoice_text and is_einvoice_text.lower() == "yes" else False
+            "is_einvoice": is_einvoice_text and is_einvoice_text.lower() == "yes"
         },
         "header": {
             "invoice_id": find_val("Invoice ID"),
@@ -60,7 +71,7 @@ def process_invoice(pdf_path):
             "sgst_total": float(find_val("Total SGST") or 0),
             "grand_total": float(find_val("Grand Total") or 0)
         },
-        "final_validation": {} 
+        "final_validation": {}
     }
 
     accumulated_taxable = 0.0
@@ -69,30 +80,28 @@ def process_invoice(pdf_path):
 
     if table_raw_data:
         for row in table_raw_data[1:]:
-            if row and len(row) >= 10 and row[1]: 
-                # Converting values for math
+            if row and len(row) >= 10 and row[1]:
                 taxable = float(row[6])
                 gst_rate = float(row[7])
                 cgst_in_pdf = float(row[8])
                 sgst_in_pdf = float(row[9])
-                
+
                 accumulated_taxable += taxable
                 accumulated_cgst += cgst_in_pdf
                 accumulated_sgst += sgst_in_pdf
-                
+
                 expected_tax = round((taxable * (gst_rate / 2)) / 100, 2)
                 math_status = "MATCHED"
                 if cgst_in_pdf != expected_tax:
                     math_status = f"ERROR (Expected {expected_tax})"
 
-                # --- YAHAN ADD KIYA HAI HSN, QTY, UOM ---
                 invoice_json["items"].append({
                     "item_id": row[0],
                     "description": row[1],
-                    "hsn_sac": row[2],      # Column index 2
-                    "quantity": row[3],     # Column index 3
-                    "uom": row[4],          # Column index 4
-                    "unit_price": row[5],   # Column index 5
+                    "hsn_sac": row[2],
+                    "quantity": row[3],
+                    "uom": row[4],
+                    "unit_price": row[5],
                     "taxable_value": taxable,
                     "gst_rate": gst_rate,
                     "cgst_amount": cgst_in_pdf,
@@ -100,24 +109,48 @@ def process_invoice(pdf_path):
                     "math_validation": math_status
                 })
 
-    calc_grand_total = round(accumulated_taxable + accumulated_cgst + accumulated_sgst, 2)
-    footer_total = invoice_json["totals"]["grand_total"]
+    calc_grand_total = round(
+        accumulated_taxable + accumulated_cgst + accumulated_sgst, 2
+    )
 
     invoice_json["final_validation"] = {
         "items_taxable_sum": round(accumulated_taxable, 2),
         "items_gst_sum": round(accumulated_cgst + accumulated_sgst, 2),
         "calculated_grand_total": calc_grand_total,
-        "grand_total_status": "MATCHED" if abs(calc_grand_total - footer_total) < 0.01 else f"MISMATCH (PDF says {footer_total})"
+        "grand_total_status": (
+            "MATCHED"
+            if abs(calc_grand_total - invoice_json["totals"]["grand_total"]) < 0.01
+            else f"MISMATCH (PDF says {invoice_json['totals']['grand_total']})"
+        )
     }
 
     return invoice_json
 
-# --- OUTPUT ---
-try:
-    final_data = process_invoice("invoice.pdf")
-    print(json.dumps(final_data, indent=4))
-    
-    with open("output_invoice.json", "w") as f:
-        json.dump(final_data, f, indent=4)
-except Exception as e:
-    print(f"Error occurred: {e}")
+
+def send_invoice_to_api(invoice_json):
+    try:
+        response = requests.post(
+            API_URL,
+            json=invoice_json,
+            timeout=REQUEST_TIMEOUT
+        )
+
+        if response.status_code == 200:
+            print("✅ Ingested | Hash:", response.json().get("invoice_hash"))
+        else:
+            print("❌ Failed:", response.status_code, response.text)
+
+    except Exception as e:
+        print("❌ API Error:", e)
+
+
+# ============ ENTRY POINT ============
+if __name__ == "__main__":
+    pdf_path = "invoice.pdf"   # change or loop over a folder
+
+    try:
+        invoice_data = process_invoice(pdf_path)
+        send_invoice_to_api(invoice_data)
+
+    except Exception as e:
+        print("❌ Processing Error:", e)
