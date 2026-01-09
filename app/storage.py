@@ -1,31 +1,32 @@
 # app/storage.py
-import os, boto3
-from botocore.client import Config
+import os
+import boto3
 from dotenv import load_dotenv
+
 load_dotenv()
 
-MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "localhost:9000")
-MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
-MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minioadmin")
-MINIO_BUCKET = os.getenv("MINIO_BUCKET", "invoices")
+# ===== Cloudflare R2 Config =====
+R2_ENDPOINT = os.getenv("R2_ENDPOINT")
+R2_ACCESS_KEY_ID = os.getenv("R2_ACCESS_KEY_ID")
+R2_SECRET_ACCESS_KEY = os.getenv("R2_SECRET_ACCESS_KEY")
+R2_BUCKET = os.getenv("R2_BUCKET_NAME")
 
-s3 = boto3.resource(
-    's3',
-    endpoint_url=f"http://{MINIO_ENDPOINT}",
-    aws_access_key_id=MINIO_ACCESS_KEY,
-    aws_secret_access_key=MINIO_SECRET_KEY,
-    config=Config(signature_version='s3v4'),
-    region_name='us-east-1'
+# Create S3-compatible client for R2
+s3 = boto3.client(
+    "s3",
+    endpoint_url=R2_ENDPOINT,
+    aws_access_key_id=R2_ACCESS_KEY_ID,
+    aws_secret_access_key=R2_SECRET_ACCESS_KEY,
+    region_name="auto"
 )
 
-def ensure_bucket():
-    try:
-        s3.create_bucket(Bucket=MINIO_BUCKET)
-    except Exception:
-        pass
-
 def upload_blob(key: str, content_bytes: bytes):
-    ensure_bucket()
-    obj = s3.Object(MINIO_BUCKET, key)
-    obj.put(Body=content_bytes)
-    return f"s3://{MINIO_BUCKET}/{key}"
+    """
+    Upload encrypted invoice blob to Cloudflare R2
+    """
+    s3.put_object(
+        Bucket=R2_BUCKET,
+        Key=key,
+        Body=content_bytes
+    )
+    return f"s3://{R2_BUCKET}/{key}"
