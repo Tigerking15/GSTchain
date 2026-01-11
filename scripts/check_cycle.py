@@ -22,6 +22,11 @@ from app.rules.structural_rules import (
 )
 from app.rules.scorer import score_cycle
 
+from app.rules.behavioural_rules import (
+    rule_dormant_activation,
+    rule_burst_invoicing
+)
+
 # ----------------------------
 
 load_dotenv()
@@ -84,14 +89,40 @@ if __name__ == "__main__":
         node_count = len(set(gstins))
         path_length = hops
 
+        # ---- BEHAVIOURAL METRICS ----
+        dates_sorted = sorted(dates)
+
+        # months dormant = max gap between invoices
+        max_gap_days = max(
+            (dates_sorted[i] - dates_sorted[i - 1]).days
+            for i in range(1, len(dates_sorted))
+        )
+        months_dormant = max_gap_days // 30
+
+        # sudden amount = max invoice amount
+        sudden_amount = max(amounts)
+
+        # burst metrics
+        invoice_count = len(dates_sorted)
+        days_window = (dates_sorted[-1] - dates_sorted[0]).days or 1
+
         # ---- APPLY RULES (NEW) ----
         rule_results = [
+            # --- TIME RULES ---
             rule_fast_cycle(dates),
             rule_same_day_loop(dates),
+
+            # --- AMOUNT RULES ---
             rule_amount_similarity(amounts),
             rule_exact_amount_repetition(amounts),
+
+            # --- STRUCTURAL RULES ---
             rule_small_closed_group(node_count),
-            rule_layering(path_length)
+            rule_layering(path_length),
+
+            # --- BEHAVIOURAL RULES (FIXED) ---
+            rule_dormant_activation(months_dormant, sudden_amount),
+            rule_burst_invoicing(invoice_count, days_window)
         ]
 
         final_score = score_cycle(rule_results)
