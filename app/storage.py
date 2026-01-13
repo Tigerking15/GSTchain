@@ -27,6 +27,19 @@ def ensure_bucket():
     except ClientError:
         s3.create_bucket(Bucket=R2_BUCKET)
 
+def upload_blob(key: str, content_bytes: bytes) -> str:
+    ensure_bucket()
+
+    s3.put_object(
+        Bucket=R2_BUCKET,
+        Key=key,
+        Body=content_bytes,
+        ContentType="application/octet-stream"
+    )
+
+    return f"s3://{R2_BUCKET}/{key}"
+
+
 def upload_json(key: str, data: dict) -> str:
     """
     Upload JSON-safe data to Cloudflare R2

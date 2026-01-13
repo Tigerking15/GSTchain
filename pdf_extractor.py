@@ -3,12 +3,10 @@ import json
 import re
 import requests
 from datetime import datetime
-from app.storage import upload_json
 
-# ================= CONFIG =================
+
 API_URL = "http://127.0.0.1:8000/invoices"
 REQUEST_TIMEOUT = 10
-# ==========================================
 
 def process_invoice(pdf_path):
     all_text = ""
@@ -91,9 +89,7 @@ def process_invoice(pdf_path):
                 accumulated_sgst += sgst_in_pdf
 
                 expected_tax = round((taxable * (gst_rate / 2)) / 100, 2)
-                math_status = "MATCHED"
-                if cgst_in_pdf != expected_tax:
-                    math_status = f"ERROR (Expected {expected_tax})"
+                math_status = "MATCHED" if cgst_in_pdf == expected_tax else f"ERROR (Expected {expected_tax})"
 
                 invoice_json["items"].append({
                     "item_id": row[0],
@@ -127,45 +123,31 @@ def process_invoice(pdf_path):
     return invoice_json
 
 
-def store_json_to_r2(invoice_json):
-    invoice_id = invoice_json["header"].get("invoice_id", "unknown")
-    timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
 
-    key = f"invoices/{invoice_id}_{timestamp}.json"
-
-    path = upload_json(key, invoice_json)
-    print(f"☁️ Stored JSON in R2 → {path}")
 
 
 def send_invoice_to_api(invoice_json):
-    try:
-        response = requests.post(
-            API_URL,
-            json=invoice_json,
-            timeout=REQUEST_TIMEOUT
-        )
+    response = requests.post(
+        API_URL,
+        json=invoice_json,
+        timeout=REQUEST_TIMEOUT
+    )
 
-        if response.status_code == 200:
-            print("✅ Ingested | Hash:", response.json().get("invoice_hash"))
-        else:
-            print("❌ Failed:", response.status_code, response.text)
-
-    except Exception as e:
-        print("❌ API Error:", e)
+    if response.status_code == 200:
+        print("✅ Ingested | Hash:", response.json().get("invoice_hash"))
+    else:
+        print("❌ Failed:", response.status_code, response.text)
 
 
-# ============ ENTRY POINT ============
 if __name__ == "__main__":
-    pdf_path = "invoice.pdf"  # or loop over a folder
+    pdf_path = "invoice.pdf"
 
     try:
         invoice_data = process_invoice(pdf_path)
 
-        # ☁️ Store JSON in R2
-        store_json_to_r2(invoice_data)
-
-        # 🚀 Ingest into system
+        # 🚀 ONLY send to API
         send_invoice_to_api(invoice_data)
 
     except Exception as e:
         print("❌ Processing Error:", e)
+

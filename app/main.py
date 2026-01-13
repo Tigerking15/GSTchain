@@ -11,6 +11,7 @@ from app.models import init_db, SessionLocal, InvoiceMeta
 from app.anchor import mock_anchor
 from app.graph import upsert_edge
 
+
 # --------------------------------------------------
 # App init
 # --------------------------------------------------
@@ -103,13 +104,23 @@ def ingest_invoice(payload: InvoiceIn):
 
     invoice_hash = canonical["metadata"]["invoice_hash"]
 
-    # ---------------- Encryption -------------------
-    enc = encrypt_bytes(serialized)
+# ---------------- Encryption -------------------
+    encrypted_bytes = encrypt_bytes(serialized)  # BYTES
 
-    # ---------------- Object Storage ---------------
+# ---------------- Object Storage ---------------
     key = f"{invoice_hash}.json.enc"
-    obj_path = upload_blob(key, json.dumps(enc).encode("utf-8"))
+
+
+    from app.storage import upload_json
+
+    obj_path = upload_json(
+    key=key.replace(".enc", ".json"),  # optional naming
+    data=encrypted_bytes               # dict → JSON
+)
+
+
     canonical["metadata"]["file_pointer"] = obj_path
+
 
     # ---------------- Blockchain Anchor ------------
     anchor_res = mock_anchor(

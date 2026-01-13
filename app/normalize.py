@@ -57,6 +57,8 @@ def canonicalize(record: dict):
         currency = header.get("currency", "INR")
 
         irn = compliance.get("irn")
+        ack_no = compliance.get("ack_no")
+        ack_date = compliance.get("ack_date")
 
         source_type = "E-INVOICE" if metadata.get("is_einvoice") else "CSV"
         source_system = metadata.get("source_system")
@@ -102,6 +104,9 @@ def canonicalize(record: dict):
         "invoice_id": invoice_id,
         "invoice_date": invoice_date,
         "irn": irn,
+        "ack_no": ack_no,
+        "ack_date": ack_date,
+
         "supplier": {
             "gstin": supplier_gstin,
             "pan": supplier_pan,
