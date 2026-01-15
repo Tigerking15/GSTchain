@@ -21,7 +21,24 @@ def rule_amount_similarity(amounts: list):
 
 
 def rule_exact_amount_repetition(amounts: list):
-    unique = set(amounts)
-    if len(unique) == 1 and len(amounts) >= 3:
-        return RuleResult("EXACT_AMOUNT_REPEATED", 75, {"amount": list(unique)[0]})
+    if len(amounts) >= 3 and len(set(amounts)) == 1:
+        return RuleResult(
+            "EXACT_AMOUNT_REPEATED",
+            75,
+            {"amount": amounts[0]}
+        )
     return RuleResult("NO_EXACT_REPETITION", 0, {})
+
+
+def rule_amount_echo(amounts: list):
+    if len(amounts) < 3:
+        return RuleResult("INSUFFICIENT_DATA", 0, {})
+
+    rounded = [round(a, -2) for a in amounts]
+    if len(set(rounded)) <= 2:
+        return RuleResult(
+            "AMOUNT_ECHO",
+            60,
+            {"rounded_amounts": rounded}
+        )
+    return RuleResult("NO_AMOUNT_ECHO", 0, {})

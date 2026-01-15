@@ -2,9 +2,6 @@ from datetime import datetime
 from .base import RuleResult
 
 def rule_fast_cycle(dates: list):
-    """
-    dates: list of datetime objects
-    """
     if not dates or len(dates) < 2:
         return RuleResult("TIME_INSUFFICIENT_DATA", 0, {})
 
@@ -23,5 +20,9 @@ def rule_fast_cycle(dates: list):
 def rule_same_day_loop(dates: list):
     unique_days = set(d.date() for d in dates)
     if len(unique_days) == 1:
-        return RuleResult("SAME_DAY_LOOP", 95, {"date": str(unique_days.pop())})
+        return RuleResult(
+            "SAME_DAY_LOOP",
+            95,
+            {"date": str(unique_days.pop())}
+        )
     return RuleResult("NOT_SAME_DAY", 0, {})
