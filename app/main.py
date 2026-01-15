@@ -8,9 +8,8 @@ from app.normalize import canonicalize
 from app.crypto import encrypt_bytes
 from app.storage import upload_blob
 from app.models import init_db, SessionLocal, InvoiceMeta
-from app.anchor import mock_anchor
+from app.anchor import anchor_hash_on_chain
 from app.graph import upsert_edge
-
 
 # --------------------------------------------------
 # App init
@@ -27,13 +26,11 @@ class InvoiceMetadata(BaseModel):
     source_system: Optional[str] = None
     is_einvoice: Optional[bool] = False
 
-
 class Header(BaseModel):
     invoice_id: str
     invoice_date: str
     currency: Optional[str] = "INR"
     place_of_supply: Optional[str] = None
-
 
 class Compliance(BaseModel):
     irn: Optional[str] = None
@@ -41,13 +38,11 @@ class Compliance(BaseModel):
     ack_date: Optional[str] = None
     qr_code_data: Optional[str] = None
 
-
 class Party(BaseModel):
     gstin: str
     pan: Optional[str] = None
     name: Optional[str] = None
     address: Optional[str] = None
-
 
 class Item(BaseModel):
     item_id: Optional[int] = None
@@ -62,7 +57,6 @@ class Item(BaseModel):
     sgst_amount: Optional[float] = None
     igst_amount: Optional[float] = None
 
-
 class Totals(BaseModel):
     total_taxable_value: Optional[float] = 0.0
     cgst_total: Optional[float] = 0.0
@@ -70,7 +64,6 @@ class Totals(BaseModel):
     igst_total: Optional[float] = 0.0
     tax_total: Optional[float] = 0.0
     grand_total: Optional[float] = 0.0
-
 
 class InvoiceIn(BaseModel):
     invoice_metadata: Optional[InvoiceMetadata] = None
@@ -110,7 +103,6 @@ def ingest_invoice(payload: InvoiceIn):
 # ---------------- Object Storage ---------------
     key = f"{invoice_hash}.json.enc"
 
-
     from app.storage import upload_json
 
     obj_path = upload_json(
@@ -118,12 +110,12 @@ def ingest_invoice(payload: InvoiceIn):
     data=encrypted_bytes               # dict → JSON
 )
 
-
     canonical["metadata"]["file_pointer"] = obj_path
 
-
     # ---------------- Blockchain Anchor ------------
-    anchor_res = mock_anchor(
+    print(">>> ABOUT TO ANCHOR ON BLOCKCHAIN <<<")
+
+    anchor_res = anchor_hash_on_chain(
         invoice_hash,
         canonical["supplier"]["gstin"],
         canonical["recipient"]["gstin"],
