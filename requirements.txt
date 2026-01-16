@@ -9,3 +9,4 @@ neo4j
 pydantic
 python-dateutil
 requests
+web3
