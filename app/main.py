@@ -1,24 +1,30 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
-import uuid, json
+import uuid
 from datetime import datetime
 
 from app.normalize import canonicalize
 from app.crypto import encrypt_bytes
-from app.storage import upload_blob
+from app.storage import upload_json
 from app.models import init_db, SessionLocal, InvoiceMeta
 from app.anchor import anchor_hash_on_chain
 from app.graph import upsert_edge
+from app.verify import router as verify_router
 
 # --------------------------------------------------
 # App init
 # --------------------------------------------------
 app = FastAPI(title="GST Circular Trade Detector - Ingest API")
-init_db()
+
+@app.on_event("startup")
+def startup():
+    init_db()
+
+app.include_router(verify_router)
 
 # --------------------------------------------------
-# SCHEMA (UPDATED TO YOUR NEW INVOICE FORMAT)
+# SCHEMA
 # --------------------------------------------------
 
 class InvoiceMetadata(BaseModel):
@@ -75,7 +81,7 @@ class InvoiceIn(BaseModel):
     totals: Totals
 
 # --------------------------------------------------
-# API ENDPOINT
+# INGEST ENDPOINT
 # --------------------------------------------------
 
 @app.post("/invoices")
@@ -87,7 +93,6 @@ def ingest_invoice(payload: InvoiceIn):
     }
 
     rec = payload.dict()
-    rec.update(ingest_meta)
 
     # ---------------- Normalization ----------------
     try:
@@ -97,19 +102,12 @@ def ingest_invoice(payload: InvoiceIn):
 
     invoice_hash = canonical["metadata"]["invoice_hash"]
 
-# ---------------- Encryption -------------------
-    encrypted_bytes = encrypt_bytes(serialized)  # BYTES
+    # ---------------- Encryption -------------------
+    encrypted_blob = encrypt_bytes(serialized)
 
-# ---------------- Object Storage ---------------
-    key = f"{invoice_hash}.json.enc"
-
-    from app.storage import upload_json
-
-    obj_path = upload_json(
-    key=key.replace(".enc", ".json"),  # optional naming
-    data=encrypted_bytes               # dict → JSON
-)
-
+    # ---------------- Object Storage ---------------
+    key = f"{invoice_hash}.json"
+    obj_path = upload_json(key=key, data=encrypted_blob)
     canonical["metadata"]["file_pointer"] = obj_path
 
     # ---------------- Blockchain Anchor ------------
@@ -131,7 +129,7 @@ def ingest_invoice(payload: InvoiceIn):
     db = SessionLocal()
     meta = InvoiceMeta(
         id=str(uuid.uuid4()),
-        ingestion_id=canonical["ingestion"]["ingestion_id"],
+        ingestion_id=ingest_meta["ingestion_id"],
         supplier_gstin=canonical["supplier"]["gstin"],
         recipient_gstin=canonical["recipient"]["gstin"],
         invoice_id=canonical["invoice_id"],
@@ -159,7 +157,7 @@ def ingest_invoice(payload: InvoiceIn):
             canonical["invoice_date"],
             canonical["total_value"],
             canonical["metadata"]["onchain_txid"],
-            canonical["ingestion"]["ingestion_id"]
+            ingest_meta["ingestion_id"]  # ✅ FIX
         )
     except Exception as e:
         print("Graph write failed:", e)
@@ -167,7 +165,7 @@ def ingest_invoice(payload: InvoiceIn):
     # ---------------- Response ---------------------
     return {
         "status": "ingested",
-        "ingestion_id": canonical["ingestion"]["ingestion_id"],
+        "ingestion_id": ingest_meta["ingestion_id"],  # ✅ FIX
         "invoice_hash": invoice_hash,
         "onchain_txid": canonical["metadata"]["onchain_txid"],
         "object_path": obj_path

@@ -56,3 +56,7 @@ def upload_json(key: str, data: dict) -> str:
     )
 
     return f"s3://{R2_BUCKET}/{key}"
+
+def download_blob(key: str) -> bytes:
+    obj = s3.get_object(Bucket=R2_BUCKET, Key=key)
+    return obj["Body"].read()

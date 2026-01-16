@@ -23,6 +23,10 @@ def canonicalize(record: dict):
     # Detect format (nested vs flat)
     # -------------------------------
 
+    ack_no = None
+    ack_date = None
+    irn = None
+
     is_nested = "header" in record and "supplier" in record and "totals" in record
 
     if is_nested:
@@ -129,10 +133,6 @@ def canonicalize(record: dict):
             "source_type": source_type,
             "source_system": source_system,
         },
-        "ingestion": {
-            "ingestion_id": record.get("ingestion_id"),
-            "ingestion_timestamp": record.get("ingestion_timestamp"),
-        },
         "metadata": {
             "invoice_hash": None,
             "file_pointer": None,
@@ -144,9 +144,11 @@ def canonicalize(record: dict):
     # -------------------------------
     # Deterministic hashing
     # -------------------------------
+    hash_input = canonical.copy()
+    hash_input.pop("metadata", None)
 
     serialized = json.dumps(
-        canonical,
+        hash_input,
         sort_keys=True,
         separators=(",", ":"),
         ensure_ascii=False
