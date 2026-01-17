@@ -2,8 +2,8 @@ from fastapi import APIRouter
 from app.models import SessionLocal, InvoiceMeta
 from app.storage import download_blob
 from app.crypto import decrypt_blob
-from app.normalize import canonicalize
 import json
+import hashlib
 
 router = APIRouter()
 
@@ -23,10 +23,10 @@ def verify(invoice_hash: str):
         encrypted_blob = json.loads(encrypted_blob_bytes.decode("utf-8"))
         decrypted_bytes = decrypt_blob(encrypted_blob)
 
-        invoice_json = json.loads(decrypted_bytes.decode("utf-8"))
-
-        canonical, _ = canonicalize(invoice_json)
-        recomputed_hash = canonical["metadata"]["invoice_hash"]
+        # The decrypted_bytes contain the canonical invoice WITHOUT metadata
+        # This is the exact same data that was hashed during ingestion
+        # So we can directly compute the hash from it
+        recomputed_hash = hashlib.sha256(decrypted_bytes).hexdigest()
 
         hash_match = recomputed_hash == invoice_hash
         onchain = meta.onchain_txid is not None
@@ -39,4 +39,4 @@ def verify(invoice_hash: str):
             "onchain_txid": meta.onchain_txid,
         }
     finally:
-        db.close()
+        db.close() 

@@ -140,7 +140,7 @@ def send_invoice_to_api(invoice_json):
 
 
 if __name__ == "__main__":
-    pdf_path = "invoice.pdf"
+    pdf_path = "invoice2.pdf"
 
     try:
         invoice_data = process_invoice(pdf_path)
