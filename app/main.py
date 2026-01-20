@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 import uuid
@@ -11,17 +12,28 @@ from app.models import init_db, SessionLocal, InvoiceMeta
 from app.anchor import anchor_hash_on_chain
 from app.graph import upsert_edge
 from app.verify import router as verify_router
+from app.fraud_detection import router as fraud_router
 
 # --------------------------------------------------
 # App init
 # --------------------------------------------------
 app = FastAPI(title="GST Circular Trade Detector - Ingest API")
 
+# CORS configuration for frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.on_event("startup")
 def startup():
     init_db()
 
 app.include_router(verify_router)
+app.include_router(fraud_router)
 
 # --------------------------------------------------
 # SCHEMA

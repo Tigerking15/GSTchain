@@ -31,12 +31,12 @@ def canonicalize(record: dict):
 
     if is_nested:
         # -------- NEW NESTED FORMAT --------
-        header = record.get("header", {})
-        supplier = record.get("supplier", {})
-        recipient = record.get("recipient", {})
-        totals = record.get("totals", {})
-        compliance = record.get("compliance", {})
-        metadata = record.get("invoice_metadata", {})
+        header = record.get("header") or {}
+        supplier = record.get("supplier") or {}
+        recipient = record.get("recipient") or {}
+        totals = record.get("totals") or {}
+        compliance = record.get("compliance") or {}
+        metadata = record.get("invoice_metadata") or {}
 
         invoice_id = header.get("invoice_id")
         invoice_date = iso_date(header.get("invoice_date"))
