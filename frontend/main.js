@@ -267,10 +267,33 @@ function renderFooter() {
         </div>
       </div>
       <div class="footer__bottom">
-        <p>© 2026 GSTchain. Built with 🔐 for secure tax compliance.</p>
+        <p>© 2026 GSTCHAIN by Saad & Shloka. Built with 🔐 for secure tax compliance.</p>
       </div>
     </footer>
   `;
+}
+
+// ============================================
+// Animation Utilities
+// ============================================
+function initScrollAnimations() {
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target); // Only animate once
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll('.animate-on-scroll').forEach(el => {
+    observer.observe(el);
+  });
 }
 
 // ============================================
@@ -285,16 +308,16 @@ function renderLanding(container) {
       <section class="hero">
         <div class="container">
           <div class="hero__content">
-            <div class="hero__badge">🔒 Blockchain Secured</div>
-            <h1 class="hero__title">
+            <div class="hero__badge animate-on-scroll animate-fade-up">🔒 Blockchain Secured</div>
+            <h1 class="hero__title animate-on-scroll animate-fade-up delay-100">
               Tamper-Proof<br>
               <span>GST Invoices</span>
             </h1>
-            <p class="hero__subtitle">
+            <p class="hero__subtitle animate-on-scroll animate-fade-up delay-200">
               The future of tax compliance is here. Upload invoices, get cryptographic proof, 
               and verify authenticity instantly with blockchain-anchored evidence.
             </p>
-            <div class="hero__cta">
+            <div class="hero__cta animate-on-scroll animate-fade-up delay-300">
               <button class="btn btn--primary btn--large" onclick="router.navigate('/select-role')">
                 Get Started →
               </button>
@@ -306,47 +329,61 @@ function renderLanding(container) {
         </div>
         
         <div class="hero__visual">
-          <div class="hero__block">📄</div>
-          <div class="hero__block">🔐</div>
-          <div class="hero__block">⛓️</div>
+          <div class="hero__block animate-on-scroll animate-pop delay-200">📄</div>
+          <div class="hero__block animate-on-scroll animate-pop delay-300">🔐</div>
+          <div class="hero__block animate-on-scroll animate-pop delay-400">⛓️</div>
         </div>
       </section>
 
       <!-- Features Section -->
       <section class="features section">
         <div class="container">
-          <h2 class="text-center mb-2xl">Why GSTchain?</h2>
-          <div class="features__grid">
-            <div class="feature-card">
+          <h2 class="text-center mb-2xl animate-on-scroll animate-fade-up">Why GSTchain?</h2>
+          <div class="bento-grid">
+            
+            <!-- Key Feature 1 (Large) -->
+            <div class="feature-card feature-card--large col-span-2 animate-on-scroll animate-fade-up delay-100">
               <div class="feature-card__icon">🔗</div>
-              <h3 class="feature-card__title">Blockchain Anchored</h3>
-              <p>Every invoice hash is anchored to Ethereum, creating an immutable timestamp that can never be altered or deleted.</p>
+              <div>
+                <h3 class="feature-card__title">Blockchain Anchored</h3>
+                <p>Every invoice hash is anchored to Ethereum, creating an immutable timestamp that can never be altered or deleted. Verification is decentralized and trustless.</p>
+              </div>
             </div>
-            <div class="feature-card">
+
+            <!-- Key Feature 2 (Large) -->
+            <div class="feature-card feature-card--large col-span-2 animate-on-scroll animate-fade-up delay-200">
+              <div class="feature-card__icon">✅</div>
+              <div>
+                <h3 class="feature-card__title">Instant Verification</h3>
+                <p>Regulators and tax officers can verify the authenticity of any invoice in milliseconds using our cryptographic proof engine. No manual audits required.</p>
+              </div>
+            </div>
+
+            <!-- Standard Features Row -->
+            <div class="feature-card col-span-1 animate-on-scroll animate-fade-up delay-300">
               <div class="feature-card__icon">🔒</div>
               <h3 class="feature-card__title">Military-Grade Encryption</h3>
-              <p>AES-256-GCM encryption protects your invoice data. Only authorized parties can access the original content.</p>
+              <p>AES-256-GCM encryption ensures your sensitive invoice data remains private and accessible only to you.</p>
             </div>
-            <div class="feature-card">
+            
+            <div class="feature-card col-span-1 animate-on-scroll animate-fade-up delay-400">
               <div class="feature-card__icon">🕵️</div>
               <h3 class="feature-card__title">Fraud Detection</h3>
-              <p>Advanced graph algorithms detect circular trade patterns and suspicious GSTIN relationships automatically.</p>
+              <p>Our graph AI automatically detects circular trading loops and suspicious supplier networks.</p>
             </div>
-            <div class="feature-card">
-              <div class="feature-card__icon">✅</div>
-              <h3 class="feature-card__title">Instant Verification</h3>
-              <p>Regulators and judges can verify any invoice in seconds. Tampering is instantly detectable.</p>
-            </div>
-            <div class="feature-card">
+
+            <div class="feature-card col-span-1 animate-on-scroll animate-fade-up delay-500">
               <div class="feature-card__icon">📊</div>
               <h3 class="feature-card__title">Audit Trail</h3>
-              <p>Complete history of every invoice with timestamps, blockchain confirmations, and cryptographic proofs.</p>
+              <p>Get a complete, tamper-proof history of every document's lifecycle from creation to filing.</p>
             </div>
-            <div class="feature-card">
+
+            <div class="feature-card col-span-1 animate-on-scroll animate-fade-up delay-600">
               <div class="feature-card__icon">🌐</div>
               <h3 class="feature-card__title">Cloud Native</h3>
-              <p>Built on Cloudflare R2 for globally distributed, highly available storage with 99.999% durability.</p>
+              <p>Built on highly durable cloud storage with global availability and redundant backups.</p>
             </div>
+            
           </div>
         </div>
       </section>
@@ -354,40 +391,61 @@ function renderLanding(container) {
       <!-- How It Works Section -->
       <section class="section">
         <div class="container">
-          <h2 class="text-center mb-2xl">How It Works</h2>
-          <div class="how-it-works__steps">
-            <div class="step">
-              <div class="step__icon">📤</div>
-              <h4>Upload Invoice</h4>
-              <p>Upload your GST invoice PDF. Our system extracts and validates all data automatically.</p>
+          <h2 class="text-center mb-2xl animate-on-scroll animate-fade-up">How It Works</h2>
+          
+          <div class="timeline">
+            <!-- Step 1 -->
+            <div class="timeline-step animate-on-scroll animate-fade-right delay-100">
+              <div class="timeline-dot">1</div>
+              <div class="timeline-content">
+                <span class="timeline-icon">📤</span>
+                <h4>Upload Invoice</h4>
+                <p>Upload your GST invoice PDF. Our system extracts and validates all data automatically using OCR and schema checks.</p>
+              </div>
             </div>
-            <div class="step">
-              <div class="step__icon">🔢</div>
-              <h4>Generate Hash</h4>
-              <p>A unique SHA-256 fingerprint is created from the canonicalized invoice data.</p>
+
+            <!-- Step 2 -->
+            <div class="timeline-step animate-on-scroll animate-fade-right delay-200">
+              <div class="timeline-dot">2</div>
+              <div class="timeline-content">
+                <span class="timeline-icon">🔢</span>
+                <h4>Generate Hash</h4>
+                <p>A unique SHA-256 fingerprint is created from the canonicalized invoice data. This ensures that even a single byte change will invalidate the hash.</p>
+              </div>
             </div>
-            <div class="step">
-              <div class="step__icon">🔐</div>
-              <h4>Encrypt & Store</h4>
-              <p>Data is encrypted with AES-256-GCM and stored securely in cloud storage.</p>
+
+            <!-- Step 3 -->
+            <div class="timeline-step animate-on-scroll animate-fade-right delay-300">
+              <div class="timeline-dot">3</div>
+              <div class="timeline-content">
+                <span class="timeline-icon">🔐</span>
+                <h4>Encrypt & Store</h4>
+                <p>Data is encrypted with AES-256-GCM and stored securely in decentralized cloud storage, ensuring privacy and availability.</p>
+              </div>
             </div>
-            <div class="step">
-              <div class="step__icon">⛓️</div>
-              <h4>Anchor to Blockchain</h4>
-              <p>The hash is permanently recorded on Ethereum with a verifiable transaction ID.</p>
+
+            <!-- Step 4 -->
+            <div class="timeline-step animate-on-scroll animate-fade-right delay-400">
+              <div class="timeline-dot">4</div>
+              <div class="timeline-content">
+                <span class="timeline-icon">⛓️</span>
+                <h4>Anchor to Blockchain</h4>
+                <p>The hash is permanently recorded on the Ethereum blockchain with a verifiable transaction ID, proving the document existed at that specific time.</p>
+              </div>
             </div>
           </div>
+
         </div>
       </section>
 
       <!-- CTA Section -->
       <section class="section section--alt">
         <div class="container text-center">
-          <h2 class="mb-lg">Ready to Secure Your Invoices?</h2>
-          <p class="mb-2xl" style="max-width: 600px; margin-left: auto; margin-right: auto;">
+          <h2 class="mb-lg animate-on-scroll animate-fade-up">Ready to Secure Your Invoices?</h2>
+          <p class="mb-2xl animate-on-scroll animate-fade-up delay-100" style="max-width: 600px; margin-left: auto; margin-right: auto;">
             Join the future of tax compliance. Whether you're a business seeking proof or a regulator verifying authenticity.
           </p>
-          <button class="btn btn--primary btn--large" onclick="router.navigate('/select-role')">
+          <button class="btn btn--primary btn--large animate-on-scroll animate-pop delay-200" onclick="router.navigate('/select-role')">
             Choose Your Role →
           </button>
         </div>
@@ -396,6 +454,9 @@ function renderLanding(container) {
 
     ${renderFooter()}
   `;
+
+  // Initialize animations after rendering
+  setTimeout(initScrollAnimations, 50);
 }
 
 // ============================================
