@@ -462,6 +462,151 @@ def get_risk_rules():
     }
 
 
+@router.get("/cycles-graph")
+def get_cycles_for_visualization():
+    """
+    Get cycle data formatted for graph visualization.
+    Returns nodes (GSTINs) and edges (invoices) for all detected cycles.
+    """
+    
+    if not NEO4J_AVAILABLE or not driver:
+        print("Neo4j driver not available, returning demo data")
+        return get_demo_graph_data()
+    
+    try:
+        with driver.session() as session:
+            # Try APOC query first, fall back to simple query
+            try:
+                result = session.run(CYCLE_DETECTION_QUERY)
+                raw_cycles = list(result)
+            except Exception as e:
+                print(f"APOC query failed, using simple query: {e}")
+                result = session.run(CYCLE_DETECTION_QUERY_SIMPLE)
+                raw_cycles = list(result)
+            
+            # Collect all unique nodes and edges across all cycles
+            nodes_dict = {}  # gstin -> node data
+            edges_list = []
+            cycles_info = []
+            
+            # Python-based deduplication using frozenset of GSTINs
+            seen_cycles = set()
+            cycle_counter = 0
+            
+            for record in raw_cycles:
+                gstins = record["gstins"]
+                amounts = record["amounts"]
+                dates = record["dates"]
+                hashes = record.get("hashes", [])
+                node_count = record["node_count"]
+                total_value = record["total_value"]
+                
+                # Create a canonical key for deduplication
+                unique_gstins = list(set(gstins[:-1] if gstins[-1] == gstins[0] else gstins))
+                cycle_key = frozenset(unique_gstins)
+                
+                # Skip if we've already seen this cycle
+                if cycle_key in seen_cycles:
+                    continue
+                seen_cycles.add(cycle_key)
+                cycle_counter += 1
+                
+                # Parse dates
+                parsed_dates = []
+                for d in dates:
+                    if isinstance(d, str):
+                        try:
+                            parsed_dates.append(datetime.fromisoformat(d))
+                        except:
+                            pass
+                
+                # Run rules to get risk score
+                rule_results = []
+                rule_results.append(rule_small_closed_group(node_count))
+                rule_results.append(rule_layering(len(gstins)))
+                rule_results.append(rule_amount_similarity(amounts))
+                rule_results.append(rule_exact_amount_repetition(amounts))
+                rule_results.append(rule_amount_echo(amounts))
+                
+                if parsed_dates:
+                    rule_results.append(rule_fast_cycle(parsed_dates))
+                    rule_results.append(rule_same_day_loop(parsed_dates))
+                
+                score = score_cycle(rule_results)
+                cycle_risk_level = score["risk_level"]
+                cycle_risk_score = score["final_risk_score"]
+                
+                # Add nodes for this cycle
+                cycle_gstins = gstins[:-1] if gstins[-1] == gstins[0] else gstins
+                for gstin in cycle_gstins:
+                    if gstin not in nodes_dict:
+                        nodes_dict[gstin] = {
+                            "id": gstin,
+                            "risk": cycle_risk_level,
+                            "risk_score": cycle_risk_score,
+                            "cycles": []
+                        }
+                    # Track which cycles this node is part of
+                    if f"CYCLE-{cycle_counter:04d}" not in nodes_dict[gstin]["cycles"]:
+                        nodes_dict[gstin]["cycles"].append(f"CYCLE-{cycle_counter:04d}")
+                    # Update risk to highest level
+                    if cycle_risk_level == "HIGH":
+                        nodes_dict[gstin]["risk"] = "HIGH"
+                        nodes_dict[gstin]["risk_score"] = max(nodes_dict[gstin]["risk_score"], cycle_risk_score)
+                    elif cycle_risk_level == "MEDIUM" and nodes_dict[gstin]["risk"] != "HIGH":
+                        nodes_dict[gstin]["risk"] = "MEDIUM"
+                        nodes_dict[gstin]["risk_score"] = max(nodes_dict[gstin]["risk_score"], cycle_risk_score)
+                
+                # Add edges for this cycle
+                for i in range(len(cycle_gstins)):
+                    from_gstin = cycle_gstins[i]
+                    to_gstin = cycle_gstins[(i + 1) % len(cycle_gstins)]
+                    
+                    edge_data = {
+                        "id": f"edge_{len(edges_list)}",
+                        "from": from_gstin,
+                        "to": to_gstin,
+                        "amount": amounts[i] if i < len(amounts) else 0,
+                        "invoice_hash": hashes[i] if i < len(hashes) else "",
+                        "invoice_date": dates[i] if i < len(dates) else "",
+                        "risk_score": cycle_risk_score,
+                        "risk_level": cycle_risk_level,
+                        "cycle_id": f"CYCLE-{cycle_counter:04d}"
+                    }
+                    edges_list.append(edge_data)
+                
+                # Store cycle info
+                cycles_info.append({
+                    "cycle_id": f"CYCLE-{cycle_counter:04d}",
+                    "node_ids": cycle_gstins,
+                    "risk_level": cycle_risk_level,
+                    "risk_score": cycle_risk_score,
+                    "total_value": total_value,
+                    "invoice_count": len(amounts)
+                })
+            
+            return {
+                "status": "success",
+                "nodes": list(nodes_dict.values()),
+                "edges": edges_list,
+                "cycles": cycles_info,
+                "summary": {
+                    "total_nodes": len(nodes_dict),
+                    "total_edges": len(edges_list),
+                    "total_cycles": len(cycles_info),
+                    "high_risk_cycles": sum(1 for c in cycles_info if c["risk_level"] == "HIGH"),
+                    "medium_risk_cycles": sum(1 for c in cycles_info if c["risk_level"] == "MEDIUM"),
+                    "low_risk_cycles": sum(1 for c in cycles_info if c["risk_level"] == "LOW")
+                }
+            }
+            
+    except Exception as e:
+        import traceback
+        print(f"Neo4j error: {e}")
+        traceback.print_exc()
+        return get_demo_graph_data()
+
+
 # ============================================
 # Demo Data (when Neo4j is not available)
 # ============================================
@@ -540,3 +685,162 @@ def get_demo_gstin_analysis(gstin: str):
             {"rule_id": "CONNECTED_TO_FLAGGED_ENTITY", "details": "Transacted with 27XYZAB5678G2Z3"}
         ]
     )
+
+
+def get_demo_graph_data():
+    """Return demo graph visualization data for testing without Neo4j"""
+    # Create demo data with 3 interconnected cycles showing all 5 cycles from the example
+    return {
+        "status": "demo_mode",
+        "nodes": [
+            {"id": "27ABCDE1234F1Z5", "risk": "HIGH", "risk_score": 92, "cycles": ["CYCLE-0001"]},
+            {"id": "27XYZAB5678G2Z3", "risk": "HIGH", "risk_score": 92, "cycles": ["CYCLE-0001"]},
+            {"id": "27MNOPQ9012H3Z1", "risk": "HIGH", "risk_score": 92, "cycles": ["CYCLE-0001"]},
+            {"id": "27LMNOP3456K4Z7", "risk": "MEDIUM", "risk_score": 65, "cycles": ["CYCLE-0002"]},
+            {"id": "27QRSTU7890L5Z8", "risk": "MEDIUM", "risk_score": 65, "cycles": ["CYCLE-0002"]},
+            {"id": "27VWXYZ2345M6Z9", "risk": "MEDIUM", "risk_score": 65, "cycles": ["CYCLE-0002"]},
+            {"id": "27DEFGH6789N7Z0", "risk": "MEDIUM", "risk_score": 65, "cycles": ["CYCLE-0002"]},
+            {"id": "27HIJKL1234P8Z1", "risk": "HIGH", "risk_score": 95, "cycles": ["CYCLE-0003"]},
+            {"id": "27STUVW5678Q9Z2", "risk": "HIGH", "risk_score": 95, "cycles": ["CYCLE-0003"]},
+        ],
+        "edges": [
+            # Cycle 1 (HIGH RISK - 3 nodes)
+            {
+                "id": "edge_0",
+                "from": "27ABCDE1234F1Z5",
+                "to": "27XYZAB5678G2Z3",
+                "amount": 1500000,
+                "invoice_hash": "abc123...",
+                "invoice_date": "2026-01-15",
+                "risk_score": 92,
+                "risk_level": "HIGH",
+                "cycle_id": "CYCLE-0001"
+            },
+            {
+                "id": "edge_1",
+                "from": "27XYZAB5678G2Z3",
+                "to": "27MNOPQ9012H3Z1",
+                "amount": 1500000,
+                "invoice_hash": "def456...",
+                "invoice_date": "2026-01-16",
+                "risk_score": 92,
+                "risk_level": "HIGH",
+                "cycle_id": "CYCLE-0001"
+            },
+            {
+                "id": "edge_2",
+                "from": "27MNOPQ9012H3Z1",
+                "to": "27ABCDE1234F1Z5",
+                "amount": 1500000,
+                "invoice_hash": "ghi789...",
+                "invoice_date": "2026-01-18",
+                "risk_score": 92,
+                "risk_level": "HIGH",
+                "cycle_id": "CYCLE-0001"
+            },
+            # Cycle 2 (MEDIUM RISK - 4 nodes)
+            {
+                "id": "edge_3",
+                "from": "27LMNOP3456K4Z7",
+                "to": "27QRSTU7890L5Z8",
+                "amount": 700000,
+                "invoice_hash": "jkl012...",
+                "invoice_date": "2026-01-10",
+                "risk_score": 65,
+                "risk_level": "MEDIUM",
+                "cycle_id": "CYCLE-0002"
+            },
+            {
+                "id": "edge_4",
+                "from": "27QRSTU7890L5Z8",
+                "to": "27VWXYZ2345M6Z9",
+                "amount": 700000,
+                "invoice_hash": "mno345...",
+                "invoice_date": "2026-01-12",
+                "risk_score": 65,
+                "risk_level": "MEDIUM",
+                "cycle_id": "CYCLE-0002"
+            },
+            {
+                "id": "edge_5",
+                "from": "27VWXYZ2345M6Z9",
+                "to": "27DEFGH6789N7Z0",
+                "amount": 700000,
+                "invoice_hash": "pqr678...",
+                "invoice_date": "2026-01-15",
+                "risk_score": 65,
+                "risk_level": "MEDIUM",
+                "cycle_id": "CYCLE-0002"
+            },
+            {
+                "id": "edge_6",
+                "from": "27DEFGH6789N7Z0",
+                "to": "27LMNOP3456K4Z7",
+                "amount": 700000,
+                "invoice_hash": "stu901...",
+                "invoice_date": "2026-01-20",
+                "risk_score": 65,
+                "risk_level": "MEDIUM",
+                "cycle_id": "CYCLE-0002"
+            },
+            # Cycle 3 (HIGH RISK - 2 nodes, same day)
+            {
+                "id": "edge_7",
+                "from": "27HIJKL1234P8Z1",
+                "to": "27STUVW5678Q9Z2",
+                "amount": 475000,
+                "invoice_hash": "vwx234...",
+                "invoice_date": "2026-01-19",
+                "risk_score": 95,
+                "risk_level": "HIGH",
+                "cycle_id": "CYCLE-0003"
+            },
+            {
+                "id": "edge_8",
+                "from": "27STUVW5678Q9Z2",
+                "to": "27HIJKL1234P8Z1",
+                "amount": 475000,
+                "invoice_hash": "yz0567...",
+                "invoice_date": "2026-01-19",
+                "risk_score": 95,
+                "risk_level": "HIGH",
+                "cycle_id": "CYCLE-0003"
+            },
+        ],
+        "cycles": [
+            {
+                "cycle_id": "CYCLE-0001",
+                "node_ids": ["27ABCDE1234F1Z5", "27XYZAB5678G2Z3", "27MNOPQ9012H3Z1"],
+                "risk_level": "HIGH",
+                "risk_score": 92,
+                "total_value": 4500000,
+                "invoice_count": 6
+            },
+            {
+                "cycle_id": "CYCLE-0002",
+                "node_ids": ["27LMNOP3456K4Z7", "27QRSTU7890L5Z8", "27VWXYZ2345M6Z9", "27DEFGH6789N7Z0"],
+                "risk_level": "MEDIUM",
+                "risk_score": 65,
+                "total_value": 2800000,
+                "invoice_count": 8
+            },
+            {
+                "cycle_id": "CYCLE-0003",
+                "node_ids": ["27HIJKL1234P8Z1", "27STUVW5678Q9Z2"],
+                "risk_level": "HIGH",
+                "risk_score": 95,
+                "total_value": 950000,
+                "invoice_count": 4
+            }
+        ],
+        "summary": {
+            "total_nodes": 9,
+            "total_edges": 9,
+            "total_cycles": 3,
+            "high_risk_cycles": 2,
+            "medium_risk_cycles": 1,
+            "low_risk_cycles": 0,
+            "note": "Demo data - Neo4j not connected"
+        }
+    }
+

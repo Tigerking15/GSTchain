@@ -142,6 +142,20 @@ const api = {
     }
   },
 
+  async getCyclesGraph() {
+    try {
+      const response = await fetch(`${API_BASE}/fraud/cycles-graph`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to fetch cycle graph');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Get cycles graph error:', error);
+      throw error;
+    }
+  },
+
   // Authentication API methods
   async registerBusiness(userData) {
     try {
@@ -1233,6 +1247,9 @@ function renderRegulatorDashboard(container) {
           <div class="dashboard__nav-item" onclick="router.navigate('/fraud-detection')">
             Cycle Detection
           </div>
+          <div class="dashboard__nav-item" onclick="router.navigate('/cycles-visualization')">
+            Cycle Visualization
+          </div>
         </nav>
       </aside>
       
@@ -1321,6 +1338,9 @@ function renderVerifyPage(container) {
           </div>
           <div class="dashboard__nav-item" onclick="router.navigate('/fraud-detection')">
             Cycle Detection
+          </div>
+          <div class="dashboard__nav-item" onclick="router.navigate('/cycles-visualization')">
+            Cycle Visualization
           </div>
         </nav>
       </aside>
@@ -1439,6 +1459,12 @@ function renderVerifyResultPage(container) {
           </div>
           <div class="dashboard__nav-item dashboard__nav-item--active">
             Result
+          </div>
+          <div class="dashboard__nav-item" onclick="router.navigate('/fraud-detection')">
+            Cycle Detection
+          </div>
+          <div class="dashboard__nav-item" onclick="router.navigate('/cycles-visualization')">
+            Cycle Visualization
           </div>
         </nav>
       </aside>
@@ -1641,6 +1667,9 @@ function renderFraudDetectionPage(container) {
           <div class="dashboard__nav-item dashboard__nav-item--active">
             Cycle Detection
           </div>
+          <div class="dashboard__nav-item" onclick="router.navigate('/cycles-visualization')">
+            Cycle Visualization
+          </div>
         </nav>
       </aside>
       
@@ -1754,66 +1783,305 @@ async function runFraudDetection() {
         </div>
       `;
     } else {
-      cyclesList.innerHTML = data.cycles.map(cycle => `
-        <div class="card mb-lg ${cycle.risk_level === 'HIGH' ? 'card--accent-pink' : cycle.risk_level === 'MEDIUM' ? 'card--accent-yellow' : ''}">
-          <div class="flex flex--between" style="align-items: flex-start; flex-wrap: wrap; gap: 16px;">
-            <div>
-              <div class="flex flex--gap-md" style="align-items: center; margin-bottom: 8px;">
-                <strong style="font-size: 1.25rem;">${cycle.cycle_id}</strong>
-                <span class="badge badge--${cycle.risk_level === 'HIGH' ? 'error' : cycle.risk_level === 'MEDIUM' ? 'warning' : 'success'}">
-                  ${cycle.risk_level} RISK
-                </span>
-              </div>
-              <p style="font-size: 0.9rem; margin-bottom: 12px;">
-                <strong>Entities:</strong> ${cycle.nodes.length} | 
-                <strong>Invoices:</strong> ${cycle.invoice_count} | 
-                <strong>Value:</strong> ₹${(cycle.total_value / 100000).toFixed(2)}L
-              </p>
+      cyclesList.innerHTML = data.cycles.map((cycle, index) => {
+        // Calculate cycle duration
+        const dates = cycle.date_range ? [cycle.date_range.start, cycle.date_range.end] : [];
+        let duration = 'N/A';
+        if (dates.length === 2 && dates[0] && dates[1]) {
+          const start = new Date(dates[0]);
+          const end = new Date(dates[1]);
+          const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+          duration = days === 0 ? 'Same day' : `${days} day${days > 1 ? 's' : ''}`;
+        }
+
+        // Get human-readable explanations for rules
+        const getRuleExplanation = (ruleId, details) => {
+          const explanations = {
+            'TINY_CLOSED_GROUP': `Only ${details?.nodes || 2 - 3} entities involved in a closed loop - highly suspicious pattern indicating coordinated fraud`,
+            'SMALL_CLOSED_GROUP': `Small group of ${details?.nodes || 4 - 5} entities repeatedly exchanging invoices in a circular pattern`,
+            'HEAVY_LAYERING': `${details?.layers || 6}+ transaction layers used to obscure the true origin and destination of funds`,
+            'HSN_FLIP': 'Product categories changed suspiciously across the cycle, indicating fake invoicing',
+            'ROUND_TRIP_<=2%': `Invoice amounts are within ${details?.difference_pct || 2}% of each other - classic round-tripping pattern`,
+            'EXACT_AMOUNT_REPEATED': `Same exact amount (₹${details?.amount?.toLocaleString('en-IN') || 'X'}) repeated ${details?.count || 3}+ times across different invoices`,
+            'AMOUNT_ECHO': 'Invoice amounts cluster around the same value, suggesting coordinated fake transactions',
+            'SAME_DAY_LOOP': `All invoices in this cycle were created on the same day (${details?.date || 'same date'}) - extremely suspicious`,
+            'FAST_LOOP_<=3_DAYS': `Complete circular cycle completed in just ${details?.duration_days || 3} days - artificially fast for genuine business`,
+            'FAST_LOOP_<=7_DAYS': `Cycle completed within ${details?.duration_days || 7} days - faster than normal business cycles`,
+            'DORMANT_GSTIN_ACTIVATION': 'Previously inactive GSTIN suddenly became active with high-value transactions',
+            'INVOICE_BURST': `${details?.count || 5}+ invoices created in ${details?.days || 5} days between same parties - burst activity pattern`,
+            'MODERATE_LAYERING': `${details?.layers || 4 - 5} transaction hops suggest intentional complexity to hide fraud`
+          };
+          return explanations[ruleId] || `${ruleId}: Suspicious pattern detected in transaction flow`;
+        };
+
+        return `
+        <div class="card mb-lg" style="background: white;">
+          <!-- Header with Cycle ID and Risk Score (COLORED BY RISK) -->
+          <div class="flex flex--between" style="align-items: center; margin-bottom: 24px; padding: 20px; margin: -32px -32px 24px -32px; background: ${cycle.risk_level === 'HIGH' ? '#EC4899' : cycle.risk_level === 'MEDIUM' ? '#FACC15' : '#22C55E'}; border-bottom: 4px solid #1a1a1a;">
+            <div class="flex flex--gap-md" style="align-items: center;">
+              <strong style="font-size: 1.5rem; font-family: var(--font-display); color: ${cycle.risk_level === 'MEDIUM' ? '#1a1a1a' : '#fff'};">${cycle.cycle_id}</strong>
+              <span class="badge badge--large" style="background: ${cycle.risk_level === 'MEDIUM' ? '#1a1a1a' : '#fff'}; color: ${cycle.risk_level === 'MEDIUM' ? '#FACC15' : '#1a1a1a'}; border-color: #1a1a1a;">
+                ${cycle.risk_level} RISK
+              </span>
             </div>
             <div class="text-center" style="min-width: 100px;">
-              <div style="font-size: 2.5rem; font-weight: bold; font-family: var(--font-display);">${cycle.risk_score}</div>
-              <div style="font-size: 0.75rem; text-transform: uppercase;">Risk Score</div>
+              <div style="font-size: 3rem; font-weight: bold; font-family: var(--font-display); line-height: 1; color: ${cycle.risk_level === 'MEDIUM' ? '#1a1a1a' : '#fff'};">${cycle.risk_score}</div>
+              <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: ${cycle.risk_level === 'MEDIUM' ? '#1a1a1a' : '#fff'};">Risk Score</div>
             </div>
           </div>
           
-          <div style="margin-top: 16px;">
-            <strong style="font-size: 0.8rem; text-transform: uppercase;">Cycle Path:</strong>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+          <!-- Two Column Layout (WHITE/NEUTRAL BACKGROUND) -->
+          <div class="grid grid--2" style="gap: 32px; align-items: start;">
+            
+            <!-- LEFT SECTION: Structured Facts -->
+            <div style="background: #FFF9E6; padding: 20px; border: 3px solid #1a1a1a; box-shadow: 4px 4px 0 #1a1a1a;">
+              <h4 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; color: #666;"> Cycle Facts</h4>
+              
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 2px solid rgba(0,0,0,0.1);">
+                  <span style="font-weight: 600; font-size: 0.85rem;">Cycle ID:</span>
+                  <span style="font-family: monospace; font-size: 0.85rem;">${cycle.cycle_id}</span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 2px solid rgba(0,0,0,0.1);">
+                  <span style="font-weight: 600; font-size: 0.85rem;">Risk Score:</span>
+                  <span style="font-size: 1.1rem; font-weight: bold; color: ${cycle.risk_level === 'HIGH' ? '#EF4444' : cycle.risk_level === 'MEDIUM' ? '#F59E0B' : '#22C55E'};">${cycle.risk_score}/100</span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 2px solid rgba(0,0,0,0.1);">
+                  <span style="font-weight: 600; font-size: 0.85rem;">Risk Level:</span>
+                  <span class="badge badge--${cycle.risk_level === 'HIGH' ? 'error' : cycle.risk_level === 'MEDIUM' ? 'warning' : 'success'}">${cycle.risk_level}</span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 2px solid rgba(0,0,0,0.1);">
+                  <span style="font-weight: 600; font-size: 0.85rem;">Total Amount:</span>
+                  <span style="font-weight: bold; font-size: 0.95rem;">₹${(cycle.total_value / 100000).toFixed(2)}L</span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 2px solid rgba(0,0,0,0.1);">
+                  <span style="font-weight: 600; font-size: 0.85rem;">Cycle Duration:</span>
+                  <span style="font-size: 0.85rem;">${duration}</span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 2px solid rgba(0,0,0,0.1);">
+                  <span style="font-weight: 600; font-size: 0.85rem;">Number of Hops:</span>
+                  <span style="font-size: 0.85rem;">${cycle.invoice_count} invoices</span>
+                </div>
+                
+                <div style="padding: 8px 0;">
+                  <span style="font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 8px;">Entities Involved (${cycle.nodes.length}):</span>
+                  <div style="display: flex; flex-direction: column; gap: 4px;">
+                    ${cycle.nodes.map((gstin, i) => `
+                      <div style="background: rgba(0,0,0,0.05); padding: 6px 8px; font-family: monospace; font-size: 0.75rem; border-left: 3px solid ${cycle.risk_level === 'HIGH' ? '#EF4444' : cycle.risk_level === 'MEDIUM' ? '#F59E0B' : '#22C55E'};">
+                        ${i + 1}. ${gstin}
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- RIGHT SECTION: Explainability Panel -->
+            <div style="background: #FFF9E6; padding: 20px; border: 3px solid #1a1a1a; box-shadow: 4px 4px 0 #1a1a1a;">
+              <h4 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; color: #666;"> Why This is Risky</h4>
+              
+              ${cycle.reasons && cycle.reasons.length > 0 ? `
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                  ${cycle.reasons.map(reason => `
+                    <div style="background: ${reason.risk >= 80 ? 'rgba(239, 68, 68, 0.1)' : reason.risk >= 50 ? 'rgba(245, 158, 11, 0.1)' : 'rgba(59, 130, 246, 0.1)'}; padding: 16px; border-left: 4px solid ${reason.risk >= 80 ? '#EF4444' : reason.risk >= 50 ? '#F59E0B' : '#3B82F6'};">
+                      <div class="flex flex--between" style="align-items: center; margin-bottom: 8px;">
+                        <strong style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">${reason.rule_id.replace(/_/g, ' ')}</strong>
+                        <span class="badge badge--${reason.risk >= 80 ? 'error' : reason.risk >= 50 ? 'warning' : 'info'}" style="font-size: 0.75rem;">+${reason.risk}</span>
+                      </div>
+                      <p style="font-size: 0.85rem; line-height: 1.5; color: #333; margin: 0;">
+                        ${getRuleExplanation(reason.rule_id, reason.details)}
+                      </p>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : `
+                <p style="color: #666; font-size: 0.9rem; font-style: italic;">No specific risk factors identified</p>
+              `}
+            </div>
+          </div>
+          
+          <!-- Cycle Path Visualization -->
+          <div style="margin-top: 24px; padding-top: 24px; border-top: 3px solid #1a1a1a;">
+            <strong style="font-size: 0.8rem; text-transform: uppercase; display: block; margin-bottom: 12px;">🔄 Transaction Flow:</strong>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
               ${cycle.nodes.map((gstin, i) => `
-                <span style="background: ${cycle.risk_level === 'HIGH' ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.1)'}; padding: 4px 8px; font-family: monospace; font-size: 0.8rem; border-radius: 4px;">
+                <span style="background: ${cycle.risk_level === 'HIGH' ? 'rgba(239, 68, 68, 0.15)' : cycle.risk_level === 'MEDIUM' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(34, 197, 94, 0.15)'}; padding: 8px 12px; font-family: monospace; font-size: 0.8rem; border: 2px solid ${cycle.risk_level === 'HIGH' ? '#EF4444' : cycle.risk_level === 'MEDIUM' ? '#F59E0B' : '#22C55E'}; font-weight: 600;">
                   ${gstin}
                 </span>
-                ${i < cycle.nodes.length - 1 ? '<span style="color: inherit;">→</span>' : '<span style="color: inherit;">↩</span>'}
+                ${i < cycle.nodes.length - 1 ? '<span style="font-size: 1.2rem; color: #666;">→</span>' : '<span style="font-size: 1.2rem; color: #666;">↻</span>'}
               `).join('')}
             </div>
           </div>
           
-          ${cycle.reasons.length > 0 ? `
-            <div style="margin-top: 16px; padding-top: 16px; border-top: 2px solid rgba(0,0,0,0.1);">
-              <strong style="font-size: 0.8rem; text-transform: uppercase;">Risk Factors:</strong>
-              <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
-                ${cycle.reasons.map(r => `
-                  <span class="badge" style="background: rgba(0,0,0,0.1); color: inherit;">
-                    ${r.rule_id} (+${r.risk})
-                  </span>
-                `).join('')}
+          <!-- Individual Cycle Graph -->
+          <div style="margin-top: 24px; border-top: 3px solid #1a1a1a; padding-top: 16px;">
+            <div class="flex flex--between" style="align-items: center; margin-bottom: 12px;">
+              <strong style="font-size: 0.9rem;">📈 Cycle Visualization</strong>
+              <div style="font-size: 0.75rem; color: #666;">
+                <span style="display: inline-block; width: 12px; height: 12px; background: ${cycle.risk_level === 'HIGH' ? '#EF4444' : cycle.risk_level === 'MEDIUM' ? '#F59E0B' : '#22C55E'}; border: 2px solid #000; margin-right: 4px;"></span>
+                ${cycle.risk_level} Risk
               </div>
             </div>
-          ` : ''}
+            <div id="cycle-graph-${index}" class="cycle-mini-graph" style="width: 100%; height: 400px; background: #FFFEF5; border: 4px solid #1a1a1a; box-shadow: 6px 6px 0 #1a1a1a;"></div>
+          </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
+
+      // Initialize individual cycle graphs
+      setTimeout(() => {
+        data.cycles.forEach((cycle, index) => {
+          renderIndividualCycleGraph(cycle, index);
+        });
+      }, 100);
     }
 
-    if (data.status === 'demo_mode') {
-      toast.warning('Showing demo data - Neo4j not connected');
-    } else {
-      toast.success(`Found ${data.cycles_detected} cycles`);
-    }
-
+    toast.success(`Found ${data.cycles_detected} cycle(s)`);
   } catch (error) {
     loading.classList.add('hidden');
-    toast.error('Fraud detection failed: ' + error.message);
+    toast.error('Failed to detect cycles: ' + error.message);
   }
+}
+
+// Render individual cycle graph using Cytoscape
+function renderIndividualCycleGraph(cycle, index) {
+  const container = document.getElementById(`cycle-graph-${index}`);
+  if (!container) return;
+
+  // Get risk color
+  const getRiskColor = (risk) => {
+    switch (risk) {
+      case 'HIGH': return '#EF4444';
+      case 'MEDIUM': return '#F59E0B';
+      case 'LOW': return '#22C55E';
+      default: return '#6B7280';
+    }
+  };
+
+  // Create elements for this specific cycle
+  const elements = [];
+
+  // Add nodes (GSTINs in this cycle)
+  cycle.nodes.forEach(gstin => {
+    elements.push({
+      data: {
+        id: gstin,
+        label: gstin,
+        risk: cycle.risk_level
+      }
+    });
+  });
+
+  // Add edges (connections between nodes in cycle)
+  for (let i = 0; i < cycle.nodes.length; i++) {
+    const from = cycle.nodes[i];
+    const to = cycle.nodes[(i + 1) % cycle.nodes.length];
+
+    elements.push({
+      data: {
+        id: `edge_${i}`,
+        source: from,
+        target: to,
+        risk_level: cycle.risk_level
+      }
+    });
+  }
+
+  // Initialize Cytoscape for this cycle
+  const cy = cytoscape({
+    container: container,
+    elements: elements,
+    style: [
+      {
+        selector: 'node',
+        style: {
+          'background-color': getRiskColor(cycle.risk_level),
+          'border-width': 4,
+          'border-color': '#1a1a1a',
+          'label': 'data(label)',
+          'text-valign': 'center',
+          'text-halign': 'center',
+          'color': '#1a1a1a',
+          'font-family': 'Space Grotesk, sans-serif',
+          'font-size': '11px',
+          'font-weight': '600',
+          'text-wrap': 'wrap',
+          'text-max-width': '100px',
+          'width': '70px',
+          'height': '70px',
+          'text-outline-width': 3,
+          'text-outline-color': '#FFFEF5',
+          'box-shadow': '4px 4px 0 #1a1a1a'
+        }
+      },
+      {
+        selector: 'node:selected',
+        style: {
+          'border-width': 6,
+          'border-color': '#4F46E5',
+          'box-shadow': '8px 8px 0 #1a1a1a'
+        }
+      },
+      {
+        selector: 'edge',
+        style: {
+          'width': cycle.risk_level === 'HIGH' ? 5 : cycle.risk_level === 'MEDIUM' ? 4 : 3,
+          'line-color': getRiskColor(cycle.risk_level),
+          'target-arrow-color': getRiskColor(cycle.risk_level),
+          'target-arrow-shape': 'triangle',
+          'curve-style': 'bezier',
+          'arrow-scale': 1.8,
+          'opacity': 0.9
+        }
+      },
+      {
+        selector: 'edge:selected',
+        style: {
+          'width': 7,
+          'opacity': 1
+        }
+      }
+    ],
+    layout: {
+      name: 'circle',
+      animate: true,
+      animationDuration: 800,
+      padding: 30,
+      spacingFactor: 1.5
+    },
+    wheelSensitivity: 0.2,
+    minZoom: 0.5,
+    maxZoom: 2,
+    userZoomingEnabled: true,
+    userPanningEnabled: true
+  });
+
+  // Add hover effects
+  cy.on('mouseover', 'node', function (evt) {
+    evt.target.style('text-outline-width', 5);
+  });
+
+  cy.on('mouseout', 'node', function (evt) {
+    evt.target.style('text-outline-width', 3);
+  });
+
+  // Highlight connected edges on node click
+  cy.on('tap', 'node', function (evt) {
+    const node = evt.target;
+    const connectedEdges = node.connectedEdges();
+
+    cy.edges().style('opacity', 0.3);
+    connectedEdges.style('opacity', 1);
+
+    setTimeout(() => {
+      cy.edges().style('opacity', 0.9);
+    }, 2000);
+  });
 }
 
 async function loadFraudRules() {
@@ -1988,6 +2256,402 @@ async function viewInvoiceFromSearch(hash) {
     toast.error('Failed to load: ' + error.message);
   }
 }
+
+// ============================================
+// Cycles Visualization Page
+// ============================================
+function renderCyclesVisualization(container) {
+  // Auth guard - redirect to login if not authenticated
+  if (!state.isAuthenticated()) {
+    toast.warning('Please login to access this page');
+    router.navigate('/login/auditor');
+    return;
+  }
+
+  container.innerHTML = `
+    ${renderHeader(true, true)}
+    
+    <div class="dashboard">
+      <aside class="dashboard__sidebar">
+        <nav class="dashboard__nav">
+          <div class="dashboard__nav-item" onclick="router.navigate('/regulator')">
+            Dashboard
+          </div>
+          <div class="dashboard__nav-item" onclick="router.navigate('/verify')">
+            Verify Invoice
+          </div>
+          <div class="dashboard__nav-item" onclick="router.navigate('/fraud-detection')">
+            Fraud Detection
+          </div>
+          <div class="dashboard__nav-item dashboard__nav-item--active">
+            Cycle Visualization
+          </div>
+        </nav>
+      </aside>
+      
+      <main class="dashboard__main">
+        <div class="dashboard__header">
+          <h1 class="dashboard__title">Live Cycle Visualization</h1>
+          <p class="dashboard__subtitle">Interactive graph showing all detected invoice cycles</p>
+        </div>
+        
+        <!-- Summary Stats -->
+        <div id="viz-summary" class="stats-grid mb-xl">
+          <div class="card stat-card card--accent-cyan card--no-hover">
+            <div class="stat-card__value" id="stat-cycles">—</div>
+            <div class="stat-card__label">Total Cycles</div>
+          </div>
+          <div class="card stat-card card--accent-pink card--no-hover">
+            <div class="stat-card__value" id="stat-high-risk">—</div>
+            <div class="stat-card__label">High Risk</div>
+          </div>
+          <div class="card stat-card card--accent-yellow card--no-hover">
+            <div class="stat-card__value" id="stat-medium-risk">—</div>
+            <div class="stat-card__label">Medium Risk</div>
+          </div>
+          <div class="card stat-card card--accent-green card--no-hover">
+            <div class="stat-card__value" id="stat-nodes">—</div>
+            <div class="stat-card__label">Entities (GSTINs)</div>
+          </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="card mb-xl cycles-viz-controls">
+          <div class="flex flex--between" style="align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div class="flex flex--gap-md" style="align-items: center;">
+              <button class="btn btn--small btn--primary" onclick="refreshCycleGraph()">
+                🔄 Refresh
+              </button>
+              <button class="btn btn--small" onclick="resetGraphZoom()">
+                🔍 Reset Zoom
+              </button>
+              <button class="btn btn--small" onclick="fitGraphToScreen()">
+                ⛶ Fit to Screen
+              </button>
+            </div>
+            
+            <!-- Legend -->
+            <div class="cycles-viz-legend">
+              <div style="display: flex; gap: 16px; align-items: center; font-size: 0.875rem;">
+                <span style="font-weight: 600;">Risk Levels:</span>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <div style="width: 16px; height: 16px; background: #EF4444; border: 3px solid #000;"></div>
+                  <span>High</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <div style="width: 16px; height: 16px; background: #F59E0B; border: 3px solid #000;"></div>
+                  <span>Medium</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <div style="width: 16px; height: 16px; background: #22C55E; border: 3px solid #000;"></div>
+                  <span>Low</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-md" style="font-size: 0.875rem; color: #666;">
+            <strong>Auto-refresh:</strong> Graph updates every 30 seconds | 
+            <strong>Tip:</strong> Click and drag nodes to rearrange, scroll to zoom
+          </div>
+        </div>
+        
+        <!-- Graph Container -->
+        <div class="card card--no-hover" style="padding: 0; overflow: hidden;">
+          <div id="cy-container" style="width: 100%; height: 700px; background: #FFFEF5;"></div>
+        </div>
+        
+        <!-- Cycle Details Panel -->
+        <div id="cycle-details" class="mt-xl" style="display: none;">
+          <div class="card">
+            <h3 class="mb-md">Selected Cycle Details</h3>
+            <div id="cycle-details-content"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  `;
+
+  // Initialize the graph
+  initCycleVisualization();
+}
+
+// Global variable to store Cytoscape instance
+let cyInstance = null;
+let autoRefreshInterval = null;
+
+function initCycleVisualization() {
+  // Load initial data
+  loadCycleGraphData();
+
+  // Set up auto-refresh every 30 seconds
+  if (autoRefreshInterval) {
+    clearInterval(autoRefreshInterval);
+  }
+  autoRefreshInterval = setInterval(() => {
+    console.log('Auto-refreshing cycle graph...');
+    loadCycleGraphData();
+  }, 30000);
+}
+
+async function loadCycleGraphData() {
+  try {
+    const data = await api.getCyclesGraph();
+
+    // Update summary stats
+    document.getElementById('stat-cycles').textContent = data.summary.total_cycles || 0;
+    document.getElementById('stat-high-risk').textContent = data.summary.high_risk_cycles || 0;
+    document.getElementById('stat-medium-risk').textContent = data.summary.medium_risk_cycles || 0;
+    document.getElementById('stat-nodes').textContent = data.summary.total_nodes || 0;
+
+    // Render the graph
+    renderCytoscapeGraph(data);
+
+  } catch (error) {
+    console.error('Failed to load cycle graph:', error);
+    toast.error('Failed to load cycle visualization');
+  }
+}
+
+function renderCytoscapeGraph(data) {
+  const container = document.getElementById('cy-container');
+  if (!container) return;
+
+  // Transform data to Cytoscape format
+  const elements = [];
+
+  // Add nodes
+  data.nodes.forEach(node => {
+    elements.push({
+      data: {
+        id: node.id,
+        label: node.id,
+        risk: node.risk,
+        risk_score: node.risk_score,
+        cycles: node.cycles || []
+      }
+    });
+  });
+
+  // Add edges
+  data.edges.forEach(edge => {
+    elements.push({
+      data: {
+        id: edge.id,
+        source: edge.from,
+        target: edge.to,
+        amount: edge.amount,
+        invoice_hash: edge.invoice_hash,
+        invoice_date: edge.invoice_date,
+        risk_score: edge.risk_score,
+        risk_level: edge.risk_level,
+        cycle_id: edge.cycle_id
+      }
+    });
+  });
+
+  // Get risk color
+  const getRiskColor = (risk) => {
+    switch (risk) {
+      case 'HIGH': return '#EF4444';
+      case 'MEDIUM': return '#F59E0B';
+      case 'LOW': return '#22C55E';
+      default: return '#6B7280';
+    }
+  };
+
+  // Initialize or update Cytoscape
+  if (cyInstance) {
+    cyInstance.destroy();
+  }
+
+  cyInstance = cytoscape({
+    container: container,
+    elements: elements,
+    style: [
+      {
+        selector: 'node',
+        style: {
+          'background-color': function (ele) {
+            return getRiskColor(ele.data('risk'));
+          },
+          'border-width': 4,
+          'border-color': '#1a1a1a',
+          'label': 'data(label)',
+          'text-valign': 'center',
+          'text-halign': 'center',
+          'color': '#1a1a1a',
+          'font-family': 'Space Grotesk, sans-serif',
+          'font-size': '12px',
+          'font-weight': '600',
+          'text-wrap': 'wrap',
+          'text-max-width': '120px',
+          'width': '80px',
+          'height': '80px',
+          'text-outline-width': 3,
+          'text-outline-color': '#FFFEF5',
+          'box-shadow': '6px 6px 0 #1a1a1a'
+        }
+      },
+      {
+        selector: 'node:selected',
+        style: {
+          'border-width': 6,
+          'border-color': '#4F46E5',
+          'box-shadow': '10px 10px 0 #1a1a1a'
+        }
+      },
+      {
+        selector: 'edge',
+        style: {
+          'width': function (ele) {
+            const risk = ele.data('risk_level');
+            return risk === 'HIGH' ? 6 : risk === 'MEDIUM' ? 4 : 3;
+          },
+          'line-color': function (ele) {
+            return getRiskColor(ele.data('risk_level'));
+          },
+          'target-arrow-color': function (ele) {
+            return getRiskColor(ele.data('risk_level'));
+          },
+          'target-arrow-shape': 'triangle',
+          'curve-style': 'bezier',
+          'arrow-scale': 2,
+          'opacity': 0.8
+        }
+      },
+      {
+        selector: 'edge:selected',
+        style: {
+          'width': 8,
+          'opacity': 1,
+          'line-style': 'solid'
+        }
+      },
+      {
+        selector: 'edge.highlighted',
+        style: {
+          'width': 8,
+          'opacity': 1,
+          'z-index': 999
+        }
+      }
+    ],
+    layout: {
+      name: 'cose',
+      animate: true,
+      animationDuration: 1000,
+      nodeRepulsion: 8000,
+      idealEdgeLength: 150,
+      edgeElasticity: 100,
+      nestingFactor: 1.2,
+      gravity: 1,
+      numIter: 1000,
+      randomize: false,
+      componentSpacing: 200
+    },
+    wheelSensitivity: 0.2,
+    minZoom: 0.3,
+    maxZoom: 3
+  });
+
+  // Add tooltips on hover
+  cyInstance.on('mouseover', 'node', function (evt) {
+    const node = evt.target;
+    const cycles = node.data('cycles').join(', ');
+    const tooltip = `
+      <strong>GSTIN:</strong> ${node.data('id')}<br>
+      <strong>Risk:</strong> ${node.data('risk')} (${node.data('risk_score')})<br>
+      <strong>Cycles:</strong> ${cycles}
+    `;
+
+    // You could add a proper tooltip library here
+    node.style('text-outline-width', 5);
+  });
+
+  cyInstance.on('mouseout', 'node', function (evt) {
+    evt.target.style('text-outline-width', 3);
+  });
+
+  cyInstance.on('mouseover', 'edge', function (evt) {
+    const edge = evt.target;
+    edge.addClass('highlighted');
+  });
+
+  cyInstance.on('mouseout', 'edge', function (evt) {
+    evt.target.removeClass('highlighted');
+  });
+
+  // Show edge details on click
+  cyInstance.on('tap', 'edge', function (evt) {
+    const edge = evt.target;
+    const data = edge.data();
+
+    const detailsPanel = document.getElementById('cycle-details');
+    const detailsContent = document.getElementById('cycle-details-content');
+
+    detailsContent.innerHTML = `
+      <div class="grid grid--2" style="gap: 16px;">
+        <div>
+          <strong>Cycle ID:</strong> ${data.cycle_id}<br>
+          <strong>From:</strong> ${data.source}<br>
+          <strong>To:</strong> ${data.target}<br>
+          <strong>Amount:</strong> ₹${data.amount.toLocaleString('en-IN')}
+        </div>
+        <div>
+          <strong>Risk Level:</strong> <span class="badge badge--${data.risk_level === 'HIGH' ? 'error' : data.risk_level === 'MEDIUM' ? 'warning' : 'success'}">${data.risk_level}</span><br>
+          <strong>Risk Score:</strong> ${data.risk_score}<br>
+          <strong>Date:</strong> ${data.invoice_date}<br>
+          <strong>Hash:</strong> <code style="font-size: 0.75rem;">${data.invoice_hash.substring(0, 16)}...</code>
+        </div>
+      </div>
+    `;
+
+    detailsPanel.style.display = 'block';
+  });
+
+  // Highlight cycle on node click
+  cyInstance.on('tap', 'node', function (evt) {
+    const node = evt.target;
+    const connectedEdges = node.connectedEdges();
+
+    // Reset all edges
+    cyInstance.edges().removeClass('highlighted');
+
+    // Highlight connected edges
+    connectedEdges.addClass('highlighted');
+  });
+}
+
+function refreshCycleGraph() {
+  toast.info('Refreshing cycle graph...');
+  loadCycleGraphData();
+}
+
+function resetGraphZoom() {
+  if (cyInstance) {
+    cyInstance.zoom(1);
+    cyInstance.center();
+  }
+}
+
+function fitGraphToScreen() {
+  if (cyInstance) {
+    cyInstance.fit(null, 50);
+  }
+}
+
+// Clean up on route change
+window.addEventListener('hashchange', () => {
+  if (autoRefreshInterval) {
+    clearInterval(autoRefreshInterval);
+    autoRefreshInterval = null;
+  }
+  if (cyInstance) {
+    cyInstance.destroy();
+    cyInstance = null;
+  }
+});
 
 // ============================================
 // Login Pages
@@ -2281,6 +2945,7 @@ router.addRoute('/regulator', renderRegulatorDashboard);
 router.addRoute('/verify', renderVerifyPage);
 router.addRoute('/verify-result', renderVerifyResultPage);
 router.addRoute('/fraud-detection', renderFraudDetectionPage);
+router.addRoute('/cycles-visualization', renderCyclesVisualization);
 router.addRoute('/about', renderAboutPage);
 router.addRoute('/404', render404);
 
@@ -2328,9 +2993,15 @@ window.performVerification = performVerification;
 window.copyToClipboard = copyToClipboard;
 window.runFraudDetection = runFraudDetection;
 window.loadFraudRules = loadFraudRules;
+window.renderIndividualCycleGraph = renderIndividualCycleGraph;
 window.viewInvoiceJSON = viewInvoiceJSON;
 window.searchGSTIN = searchGSTIN;
 window.viewInvoiceFromSearch = viewInvoiceFromSearch;
+
+// Cycle visualization handlers
+window.refreshCycleGraph = refreshCycleGraph;
+window.resetGraphZoom = resetGraphZoom;
+window.fitGraphToScreen = fitGraphToScreen;
 
 // Auth handlers
 window.handleBusinessLogin = handleBusinessLogin;
