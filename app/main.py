@@ -13,6 +13,7 @@ from app.anchor import anchor_hash_on_chain
 from app.graph import upsert_edge
 from app.verify import router as verify_router
 from app.fraud_detection import router as fraud_router
+from app.auth import router as auth_router
 
 # --------------------------------------------------
 # App init
@@ -34,6 +35,7 @@ def startup():
 
 app.include_router(verify_router)
 app.include_router(fraud_router)
+app.include_router(auth_router)
 
 # --------------------------------------------------
 # SCHEMA

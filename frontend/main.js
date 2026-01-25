@@ -140,6 +140,97 @@ const api = {
       console.error('GSTIN search error:', error);
       throw error;
     }
+  },
+
+  // Authentication API methods
+  async registerBusiness(userData) {
+    try {
+      const response = await fetch(`${API_BASE}/auth/register/business`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Registration failed');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Register business error:', error);
+      throw error;
+    }
+  },
+
+  async registerAuditor(userData) {
+    try {
+      const response = await fetch(`${API_BASE}/auth/register/auditor`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Registration failed');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Register auditor error:', error);
+      throw error;
+    }
+  },
+
+  async loginBusiness(credentials) {
+    try {
+      const response = await fetch(`${API_BASE}/auth/login/business`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Login failed');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Login business error:', error);
+      throw error;
+    }
+  },
+
+  async loginAuditor(credentials) {
+    try {
+      const response = await fetch(`${API_BASE}/auth/login/auditor`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Login failed');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Login auditor error:', error);
+      throw error;
+    }
+  },
+
+  async getCurrentUser() {
+    try {
+      const token = state.authToken;
+      if (!token) throw new Error('Not authenticated');
+
+      const response = await fetch(`${API_BASE}/auth/me`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (!response.ok) {
+        throw new Error('Invalid session');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Get user error:', error);
+      throw error;
+    }
   }
 };
 
@@ -163,8 +254,8 @@ const toast = {
     const icons = {
       success: '✓',
       error: '✗',
-      warning: '⚠',
-      info: 'ℹ'
+      warning: '!',
+      info: 'i'
     };
 
     const toastEl = document.createElement('div');
@@ -191,13 +282,75 @@ const toast = {
 // State Management
 // ============================================
 const state = {
-  userRole: localStorage.getItem('userRole') || null,
-  lastProof: JSON.parse(localStorage.getItem('lastProof') || 'null'),
-  recentVerifications: JSON.parse(localStorage.getItem('recentVerifications') || '[]'),
+  // Account State
+  accounts: [], // Array of { token, user, role }
+  activeAccountIndex: -1,
 
-  setRole(role) {
-    this.userRole = role;
-    localStorage.setItem('userRole', role);
+  // Other State
+  lastProof: null,
+  recentVerifications: [],
+
+  // Getters for backward compatibility
+  get authToken() {
+    if (this.activeAccountIndex === -1 || !this.accounts[this.activeAccountIndex]) return null;
+    return this.accounts[this.activeAccountIndex].token;
+  },
+
+  get currentUser() {
+    if (this.activeAccountIndex === -1 || !this.accounts[this.activeAccountIndex]) return null;
+    return this.accounts[this.activeAccountIndex].user;
+  },
+
+  get userRole() {
+    if (this.activeAccountIndex === -1 || !this.accounts[this.activeAccountIndex]) return null;
+    return this.accounts[this.activeAccountIndex].role;
+  },
+
+  init() {
+    this.loadFromStorage();
+  },
+
+  loadFromStorage() {
+    try {
+      // Load accounts
+      const storedAccounts = localStorage.getItem('accounts');
+      const storedActiveIndex = localStorage.getItem('activeAccountIndex');
+
+      if (storedAccounts) {
+        this.accounts = JSON.parse(storedAccounts);
+        this.activeAccountIndex = storedActiveIndex ? parseInt(storedActiveIndex) : (this.accounts.length > 0 ? 0 : -1);
+      } else {
+        // Migration from legacy storage if exists
+        const legacyToken = localStorage.getItem('authToken');
+        const legacyUser = localStorage.getItem('currentUser');
+        const legacyRole = localStorage.getItem('userRole');
+
+        if (legacyToken && legacyUser && legacyRole) {
+          this.accounts = [{
+            token: legacyToken,
+            user: JSON.parse(legacyUser),
+            role: legacyRole
+          }];
+          this.activeAccountIndex = 0;
+          this.saveAuth();
+        }
+      }
+
+      const lastProof = localStorage.getItem('lastProof');
+      if (lastProof) this.lastProof = JSON.parse(lastProof);
+
+      const verifications = localStorage.getItem('recentVerifications');
+      if (verifications) this.recentVerifications = JSON.parse(verifications);
+    } catch (e) {
+      console.error('Error loading state:', e);
+      this.accounts = [];
+      this.activeAccountIndex = -1;
+    }
+  },
+
+  saveAuth() {
+    localStorage.setItem('accounts', JSON.stringify(this.accounts));
+    localStorage.setItem('activeAccountIndex', this.activeAccountIndex);
   },
 
   saveProof(proof) {
@@ -209,28 +362,126 @@ const state = {
     this.recentVerifications.unshift(verification);
     this.recentVerifications = this.recentVerifications.slice(0, 10);
     localStorage.setItem('recentVerifications', JSON.stringify(this.recentVerifications));
+  },
+
+  login(token, user, role) {
+    // Check if account already exists
+    const existingIndex = this.accounts.findIndex(acc => acc.user.email === user.email);
+
+    if (existingIndex !== -1) {
+      this.accounts[existingIndex] = { token, user, role };
+      this.activeAccountIndex = existingIndex;
+    } else {
+      // Enforce role consistency
+      if (this.accounts.length > 0) {
+        const currentRole = this.accounts[0].role;
+        if (role !== currentRole) {
+          alert(`You are currently logged in as a ${currentRole}. Please logout to switch roles.`);
+          return false;
+        }
+      }
+      this.accounts.push({ token, user, role });
+      this.activeAccountIndex = this.accounts.length - 1;
+    }
+
+    this.saveAuth();
+    return true;
+  },
+
+  logout() {
+    if (this.activeAccountIndex !== -1) {
+      this.accounts.splice(this.activeAccountIndex, 1);
+
+      if (this.accounts.length > 0) {
+        this.activeAccountIndex = 0;
+        this.saveAuth();
+        window.location.reload();
+        return;
+      }
+    }
+
+    this.activeAccountIndex = -1;
+    this.accounts = [];
+    localStorage.removeItem('accounts');
+    localStorage.removeItem('activeAccountIndex');
+
+    // Clear legacy
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('userRole');
+  },
+
+  switchAccount(index) {
+    if (index >= 0 && index < this.accounts.length) {
+      this.activeAccountIndex = index;
+      this.saveAuth();
+      window.location.reload();
+    }
+  },
+
+  isAuthenticated() {
+    return this.accounts.length > 0 && this.activeAccountIndex !== -1;
   }
 };
 
 // ============================================
 // Header Component
 // ============================================
-function renderHeader(showNav = true) {
+function renderHeader(showNav = true, hideDashboardLink = false) {
+  const isLoggedIn = state.isAuthenticated();
+  const userName = state.currentUser?.name || '';
+
   return `
     <header class="header">
       <a href="#/" class="header__logo">
-        <span class="header__logo-icon">⛓️</span>
         <span>GSTchain</span>
       </a>
       ${showNav ? `
         <nav class="header__nav">
-          <a href="#/" class="header__nav-link">Home</a>
-          <a href="#/about" class="header__nav-link">About</a>
-          ${state.userRole ? `
+          ${isLoggedIn ? `
+            ${!hideDashboardLink ? `
             <a href="#/${state.userRole === 'business' ? 'business' : 'regulator'}" class="header__nav-link header__nav-link--active">
-              ${state.userRole === 'business' ? 'Dashboard' : 'Verify'}
+              Dashboard
             </a>
-          ` : ''}
+            ` : ''}
+            <div class="user-dropdown" style="position: relative; margin-left: 16px;">
+              <button class="btn btn--small user-dropdown__trigger" onclick="toggleUserDropdown(event)" style="display: flex; align-items: center; gap: 8px;">
+                <span>${userName}</span>
+                <span style="font-size: 10px;">▼</span>
+              </button>
+              <div id="user-dropdown-menu" class="user-dropdown__menu hidden" style="position: absolute; top: 100%; right: 0; margin-top: 8px; background: white; border: 3px solid black; box-shadow: 8px 8px 0 rgba(0,0,0,0.2); min-width: 250px; z-index: 100;">
+                
+                ${state.accounts.map((acc, index) => {
+    const isCurrent = index === state.activeAccountIndex;
+    const accName = acc.user.name || acc.user.full_name || acc.user.email;
+    return `
+                    <div 
+                      onclick="${!isCurrent ? `switchAccount(${index})` : ''}"
+                      style="padding: 12px 16px; border-bottom: 1px solid #eee; cursor: ${isCurrent ? 'default' : 'pointer'}; background: ${isCurrent ? '#f9f9f9' : 'white'}; display: flex; align-items: center; justify-content: space-between;"
+                      onmouseover="this.style.background='${isCurrent ? '#f9f9f9' : '#f5f5f5'}'" 
+                      onmouseout="this.style.background='${isCurrent ? '#f9f9f9' : 'white'}'"
+                    >
+                      <div>
+                        <div style="font-weight: 600; font-size: 0.9rem; color: #333;">${accName}</div>
+                        <div style="font-size: 0.75rem; color: #666;">${acc.user.email}</div>
+                      </div>
+                      ${isCurrent ? '<span style="color: green; font-weight: bold; font-size: 0.8rem;">Active</span>' : ''}
+                    </div>
+                  `;
+  }).join('')}
+
+                <button onclick="router.navigate('/login/${state.userRole}')" style="width: 100%; padding: 12px 16px; background: none; border: none; text-align: left; cursor: pointer; font-size: 0.85rem; color: #0066cc; border-bottom: 1px solid #eee;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='none'">
+                  + Add another account
+                </button>
+
+                <button onclick="handleLogout()" style="width: 100%; padding: 12px 16px; background: none; border: none; text-align: left; cursor: pointer; font-size: 0.95rem; font-weight: 500; color: #d32f2f;" onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background='none'">
+                  Logout
+                </button>
+              </div>
+            </div>
+          ` : `
+            <a href="#/select-role" class="header__nav-link">Login</a>
+          `}
         </nav>
       ` : ''}
     </header>
@@ -245,7 +496,7 @@ function renderFooter() {
     <footer class="footer">
       <div class="footer__content">
         <div>
-          <div class="footer__logo">⛓️ GSTchain</div>
+          <div class="footer__logo">GSTchain</div>
           <p class="footer__text">
             Blockchain-powered GST invoice verification and fraud detection system. 
             Ensuring tamper-proof compliance for the digital age.
@@ -267,7 +518,7 @@ function renderFooter() {
         </div>
       </div>
       <div class="footer__bottom">
-        <p>© 2026 GSTCHAIN by Saad & Shloka. Built with 🔐 for secure tax compliance.</p>
+        <p>© 2026 GSTCHAIN by Saad & Shloka. Built for secure tax compliance.</p>
       </div>
     </footer>
   `;
@@ -305,33 +556,27 @@ function renderLanding(container) {
     
     <main>
       <!-- Hero Section -->
-      <section class="hero">
+      <section class="hero hero--centered">
         <div class="container">
-          <div class="hero__content">
-            <div class="hero__badge animate-on-scroll animate-fade-up">🔒 Blockchain Secured</div>
-            <h1 class="hero__title animate-on-scroll animate-fade-up delay-100">
+          <div class="hero__content hero__content--large">
+            <div class="hero__badge animate-on-scroll animate-fade-up">Blockchain Secured</div>
+            <h1 class="hero__title hero__title--large animate-on-scroll animate-fade-up delay-100">
               Tamper-Proof<br>
               <span>GST Invoices</span>
             </h1>
-            <p class="hero__subtitle animate-on-scroll animate-fade-up delay-200">
+            <p class="hero__subtitle hero__subtitle--large animate-on-scroll animate-fade-up delay-200">
               The future of tax compliance is here. Upload invoices, get cryptographic proof, 
               and verify authenticity instantly with blockchain-anchored evidence.
             </p>
             <div class="hero__cta animate-on-scroll animate-fade-up delay-300">
               <button class="btn btn--primary btn--large" onclick="router.navigate('/select-role')">
-                Get Started →
+                Get Started
               </button>
               <button class="btn btn--large" onclick="router.navigate('/about')">
                 Learn More
               </button>
             </div>
           </div>
-        </div>
-        
-        <div class="hero__visual">
-          <div class="hero__block animate-on-scroll animate-pop delay-200">📄</div>
-          <div class="hero__block animate-on-scroll animate-pop delay-300">🔐</div>
-          <div class="hero__block animate-on-scroll animate-pop delay-400">⛓️</div>
         </div>
       </section>
 
@@ -343,7 +588,6 @@ function renderLanding(container) {
             
             <!-- Key Feature 1 (Large) -->
             <div class="feature-card feature-card--large col-span-2 animate-on-scroll animate-fade-up delay-100">
-              <div class="feature-card__icon">🔗</div>
               <div>
                 <h3 class="feature-card__title">Blockchain Anchored</h3>
                 <p>Every invoice hash is anchored to Ethereum, creating an immutable timestamp that can never be altered or deleted. Verification is decentralized and trustless.</p>
@@ -352,7 +596,6 @@ function renderLanding(container) {
 
             <!-- Key Feature 2 (Large) -->
             <div class="feature-card feature-card--large col-span-2 animate-on-scroll animate-fade-up delay-200">
-              <div class="feature-card__icon">✅</div>
               <div>
                 <h3 class="feature-card__title">Instant Verification</h3>
                 <p>Regulators and tax officers can verify the authenticity of any invoice in milliseconds using our cryptographic proof engine. No manual audits required.</p>
@@ -361,25 +604,21 @@ function renderLanding(container) {
 
             <!-- Standard Features Row -->
             <div class="feature-card col-span-1 animate-on-scroll animate-fade-up delay-300">
-              <div class="feature-card__icon">🔒</div>
               <h3 class="feature-card__title">Military-Grade Encryption</h3>
               <p>AES-256-GCM encryption ensures your sensitive invoice data remains private and accessible only to you.</p>
             </div>
             
             <div class="feature-card col-span-1 animate-on-scroll animate-fade-up delay-400">
-              <div class="feature-card__icon">🕵️</div>
               <h3 class="feature-card__title">Fraud Detection</h3>
               <p>Our graph AI automatically detects circular trading loops and suspicious supplier networks.</p>
             </div>
 
             <div class="feature-card col-span-1 animate-on-scroll animate-fade-up delay-500">
-              <div class="feature-card__icon">📊</div>
               <h3 class="feature-card__title">Audit Trail</h3>
               <p>Get a complete, tamper-proof history of every document's lifecycle from creation to filing.</p>
             </div>
 
             <div class="feature-card col-span-1 animate-on-scroll animate-fade-up delay-600">
-              <div class="feature-card__icon">🌐</div>
               <h3 class="feature-card__title">Cloud Native</h3>
               <p>Built on highly durable cloud storage with global availability and redundant backups.</p>
             </div>
@@ -398,7 +637,6 @@ function renderLanding(container) {
             <div class="timeline-step animate-on-scroll animate-fade-right delay-100">
               <div class="timeline-dot">1</div>
               <div class="timeline-content">
-                <span class="timeline-icon">📤</span>
                 <h4>Upload Invoice</h4>
                 <p>Upload your GST invoice PDF. Our system extracts and validates all data automatically using OCR and schema checks.</p>
               </div>
@@ -408,7 +646,6 @@ function renderLanding(container) {
             <div class="timeline-step animate-on-scroll animate-fade-right delay-200">
               <div class="timeline-dot">2</div>
               <div class="timeline-content">
-                <span class="timeline-icon">🔢</span>
                 <h4>Generate Hash</h4>
                 <p>A unique SHA-256 fingerprint is created from the canonicalized invoice data. This ensures that even a single byte change will invalidate the hash.</p>
               </div>
@@ -418,7 +655,6 @@ function renderLanding(container) {
             <div class="timeline-step animate-on-scroll animate-fade-right delay-300">
               <div class="timeline-dot">3</div>
               <div class="timeline-content">
-                <span class="timeline-icon">🔐</span>
                 <h4>Encrypt & Store</h4>
                 <p>Data is encrypted with AES-256-GCM and stored securely in decentralized cloud storage, ensuring privacy and availability.</p>
               </div>
@@ -428,7 +664,6 @@ function renderLanding(container) {
             <div class="timeline-step animate-on-scroll animate-fade-right delay-400">
               <div class="timeline-dot">4</div>
               <div class="timeline-content">
-                <span class="timeline-icon">⛓️</span>
                 <h4>Anchor to Blockchain</h4>
                 <p>The hash is permanently recorded on the Ethereum blockchain with a verifiable transaction ID, proving the document existed at that specific time.</p>
               </div>
@@ -446,7 +681,7 @@ function renderLanding(container) {
             Join the future of tax compliance. Whether you're a business seeking proof or a regulator verifying authenticity.
           </p>
           <button class="btn btn--primary btn--large animate-on-scroll animate-pop delay-200" onclick="router.navigate('/select-role')">
-            Choose Your Role →
+            Choose Your Role
           </button>
         </div>
       </section>
@@ -474,19 +709,17 @@ function renderRoleSelection(container) {
         </p>
         
         <div class="role-selection__cards">
-          <div class="card card--accent-yellow role-card" onclick="selectRole('business')">
-            <div class="role-card__icon">💼</div>
-            <h3 class="role-card__title">Business / Auditor</h3>
+          <div class="card card--accent-yellow role-card" onclick="router.navigate('/login/business')">
+            <h3 class="role-card__title">Business User</h3>
             <p class="role-card__desc">
-              Upload invoices and get cryptographic proof. Perfect for businesses and auditors who need tamper-proof evidence.
+              Upload invoices and get cryptographic proof. Perfect for businesses who need tamper-proof evidence.
             </p>
           </div>
           
-          <div class="card card--primary role-card" onclick="selectRole('regulator')">
-            <div class="role-card__icon">⚖️</div>
-            <h3 class="role-card__title">Regulator / Judge</h3>
+          <div class="card card--primary role-card" onclick="router.navigate('/login/auditor')">
+            <h3 class="role-card__title">Auditor</h3>
             <p class="role-card__desc">
-              Verify invoice authenticity and detect tampering. Built for regulators, judges, and compliance officers.
+              Verify invoice authenticity and detect tampering. Built for auditors and compliance officers.
             </p>
           </div>
         </div>
@@ -507,28 +740,32 @@ function selectRole(role) {
 // Business Dashboard
 // ============================================
 function renderBusinessDashboard(container) {
+  // Auth guard - redirect to login if not authenticated
+  if (!state.isAuthenticated()) {
+    toast.warning('Please login to access the dashboard');
+    router.navigate('/login/business');
+    return;
+  }
+
   const lastProof = state.lastProof;
 
   container.innerHTML = `
-    ${renderHeader()}
+    ${renderHeader(true, true)}
     
     <div class="dashboard">
       <aside class="dashboard__sidebar">
         <nav class="dashboard__nav">
           <div class="dashboard__nav-item dashboard__nav-item--active" onclick="router.navigate('/business')">
-            📊 Dashboard
+            Dashboard
           </div>
           <div class="dashboard__nav-item" onclick="router.navigate('/upload')">
-            📤 Upload Invoice
+            Upload Invoice
           </div>
           ${lastProof ? `
             <div class="dashboard__nav-item" onclick="router.navigate('/proof')">
-              📜 View Last Proof
+              View Last Proof
             </div>
           ` : ''}
-          <div class="dashboard__nav-item" onclick="router.navigate('/select-role')">
-            🔄 Switch Role
-          </div>
         </nav>
       </aside>
       
@@ -557,11 +794,11 @@ function renderBusinessDashboard(container) {
           <h3 class="mb-lg">Quick Actions</h3>
           <div class="flex flex--gap-lg" style="flex-wrap: wrap;">
             <button class="btn btn--primary" onclick="router.navigate('/upload')">
-              📤 Upload New Invoice
+              Upload New Invoice
             </button>
             ${lastProof ? `
               <button class="btn" onclick="router.navigate('/proof')">
-                📜 View Last Proof
+                View Last Proof
               </button>
             ` : ''}
           </div>
@@ -588,6 +825,15 @@ function renderBusinessDashboard(container) {
 // Upload Page
 // ============================================
 function renderUploadPage(container) {
+  // Auth guard - redirect to login if not authenticated
+  if (!state.isAuthenticated()) {
+    toast.warning('Please login to access this page');
+    router.navigate('/login/business');
+    return;
+  }
+
+  const lastProof = state.lastProof;
+
   container.innerHTML = `
     ${renderHeader()}
     
@@ -595,14 +841,16 @@ function renderUploadPage(container) {
       <aside class="dashboard__sidebar">
         <nav class="dashboard__nav">
           <div class="dashboard__nav-item" onclick="router.navigate('/business')">
-            📊 Dashboard
+            Dashboard
           </div>
           <div class="dashboard__nav-item dashboard__nav-item--active">
-            📤 Upload Invoice
+            Upload Invoice
           </div>
-          <div class="dashboard__nav-item" onclick="router.navigate('/select-role')">
-            🔄 Switch Role
-          </div>
+          ${lastProof ? `
+            <div class="dashboard__nav-item" onclick="router.navigate('/proof')">
+              View Last Proof
+            </div>
+          ` : ''}
         </nav>
       </aside>
       
@@ -614,7 +862,6 @@ function renderUploadPage(container) {
         
         <div class="card card--no-hover">
           <div id="upload-zone" class="upload-zone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
-            <div class="upload-zone__icon">📄</div>
             <div class="upload-zone__text">Drop your invoice PDF here</div>
             <div class="upload-zone__subtext">or click to browse files</div>
             <input type="file" id="file-input" accept=".pdf,.json" style="display: none;" onchange="handleFileSelect(event)">
@@ -675,7 +922,7 @@ function renderUploadPage(container) {
             </div>
             
             <button type="submit" class="btn btn--primary btn--large mt-xl" style="width: 100%;">
-              🔒 Anchor to Blockchain
+              Anchor to Blockchain
             </button>
           </form>
         </div>
@@ -774,7 +1021,7 @@ async function handleManualSubmit(e) {
     { width: 20, text: 'Canonicalizing invoice data...' },
     { width: 40, text: 'Generating SHA-256 hash...' },
     { width: 60, text: 'Encrypting with AES-256-GCM...' },
-    { width: 80, text: 'Anchoring to Ethereum blockchain...' },
+    { width: 80, text: 'Anchoring to Polygon Amoy blockchain...' },
     { width: 100, text: 'Complete!' }
   ];
 
@@ -807,6 +1054,13 @@ async function handleManualSubmit(e) {
 // Proof Display Page
 // ============================================
 function renderProofPage(container) {
+  // Auth guard - redirect to login if not authenticated
+  if (!state.isAuthenticated()) {
+    toast.warning('Please login to access this page');
+    router.navigate('/login/business');
+    return;
+  }
+
   const proof = state.lastProof;
 
   if (!proof) {
@@ -829,13 +1083,13 @@ function renderProofPage(container) {
       <aside class="dashboard__sidebar">
         <nav class="dashboard__nav">
           <div class="dashboard__nav-item" onclick="router.navigate('/business')">
-            📊 Dashboard
+            Dashboard
           </div>
           <div class="dashboard__nav-item" onclick="router.navigate('/upload')">
-            📤 Upload Invoice
+            Upload Invoice
           </div>
           <div class="dashboard__nav-item dashboard__nav-item--active">
-            📜 View Proof
+            View Last Proof
           </div>
         </nav>
       </aside>
@@ -867,8 +1121,8 @@ function renderProofPage(container) {
                 <button class="hash-display__copy" onclick="copyToClipboard('${proof.onchain_txid}')">Copy</button>
               </div>
               <p class="mt-md" style="font-size: 0.875rem;">
-                <a href="https://sepolia.etherscan.io/tx/${proof.onchain_txid}" target="_blank" style="color: inherit; text-decoration: underline;">
-                  View on Etherscan →
+                <a href="https://amoy.polygonscan.com/tx/${proof.onchain_txid}" target="_blank" style="color: inherit; text-decoration: underline;">
+                  View on Polygonscan →
                 </a>
               </p>
             </div>
@@ -886,13 +1140,13 @@ function renderProofPage(container) {
           
           <div class="flex flex--gap-lg mt-2xl" style="justify-content: center; flex-wrap: wrap;">
             <button class="btn btn--accent" onclick="viewInvoiceJSON('${proof.invoice_hash}')">
-              📋 View Invoice JSON
+              View Invoice JSON
             </button>
             <button class="btn btn--primary" onclick="downloadProof()">
-              📥 Download Proof
+              Download Proof
             </button>
             <button class="btn" onclick="router.navigate('/upload')">
-              📤 Upload Another
+              Upload Another
             </button>
           </div>
           
@@ -955,25 +1209,29 @@ This proof is cryptographically secured and blockchain-anchored.
 // Regulator Dashboard
 // ============================================
 function renderRegulatorDashboard(container) {
+  // Auth guard - redirect to login if not authenticated
+  if (!state.isAuthenticated()) {
+    toast.warning('Please login to access the dashboard');
+    router.navigate('/login/auditor');
+    return;
+  }
+
   const recentVerifications = state.recentVerifications;
 
   container.innerHTML = `
-    ${renderHeader()}
+    ${renderHeader(true, true)}
     
     <div class="dashboard">
       <aside class="dashboard__sidebar">
         <nav class="dashboard__nav">
           <div class="dashboard__nav-item dashboard__nav-item--active" onclick="router.navigate('/regulator')">
-            ⚖️ Dashboard
+            Dashboard
           </div>
           <div class="dashboard__nav-item" onclick="router.navigate('/verify')">
-            🔍 Verify Invoice
+            Verify Invoice
           </div>
           <div class="dashboard__nav-item" onclick="router.navigate('/fraud-detection')">
-            🔄 Cycle Detection
-          </div>
-          <div class="dashboard__nav-item" onclick="router.navigate('/select-role')">
-            ↩ Switch Role
+            Cycle Detection
           </div>
         </nav>
       </aside>
@@ -1042,6 +1300,13 @@ function quickVerify(e) {
 // Verify Page
 // ============================================
 function renderVerifyPage(container) {
+  // Auth guard - redirect to login if not authenticated
+  if (!state.isAuthenticated()) {
+    toast.warning('Please login to access this page');
+    router.navigate('/login/auditor');
+    return;
+  }
+
   container.innerHTML = `
     ${renderHeader()}
     
@@ -1049,22 +1314,24 @@ function renderVerifyPage(container) {
       <aside class="dashboard__sidebar">
         <nav class="dashboard__nav">
           <div class="dashboard__nav-item" onclick="router.navigate('/regulator')">
-            ⚖️ Dashboard
+            Dashboard
           </div>
           <div class="dashboard__nav-item dashboard__nav-item--active">
-            🔍 Verify Invoice
+            Verify Invoice
+          </div>
+          <div class="dashboard__nav-item" onclick="router.navigate('/fraud-detection')">
+            Cycle Detection
           </div>
         </nav>
       </aside>
       
       <main class="dashboard__main">
-        <div class="container--narrow">
-          <div class="text-center mb-2xl">
-            <h1>Verify Invoice</h1>
-            <p style="color: #666;">Enter an invoice hash to verify its authenticity and check for tampering.</p>
-          </div>
-          
-          <div class="card card--no-hover">
+        <div class="dashboard__header">
+          <h1 class="dashboard__title">Verify Invoice</h1>
+          <p class="dashboard__subtitle">Enter an invoice hash to verify its authenticity and check for tampering.</p>
+        </div>
+        
+        <div class="card card--no-hover" style="max-width: 600px; margin: 0 auto;">
             <form onsubmit="performVerification(event)" id="verify-form">
               <div class="input-group mb-xl">
                 <label class="input-label">Invoice Hash</label>
@@ -1074,7 +1341,7 @@ function renderVerifyPage(container) {
               </div>
               
               <button type="submit" class="btn btn--primary btn--large" style="width: 100%;">
-                🔍 Verify Invoice
+                Verify Invoice
               </button>
             </form>
             
@@ -1085,7 +1352,7 @@ function renderVerifyPage(container) {
           </div>
           
           <div class="card mt-xl">
-            <h4 class="mb-md">ℹ️ What happens during verification?</h4>
+            <h4 class="mb-md">What happens during verification?</h4>
             <ol style="padding-left: 20px; color: #666;">
               <li style="margin-bottom: 8px;">The system retrieves the encrypted invoice from secure storage</li>
               <li style="margin-bottom: 8px;">The invoice is decrypted using the master key</li>
@@ -1141,6 +1408,13 @@ async function performVerification(e) {
 // Verify Result Page
 // ============================================
 function renderVerifyResultPage(container) {
+  // Auth guard - redirect to login if not authenticated
+  if (!state.isAuthenticated()) {
+    toast.warning('Please login to access this page');
+    router.navigate('/login/auditor');
+    return;
+  }
+
   const result = JSON.parse(localStorage.getItem('lastVerifyResult') || 'null');
 
   if (!result) {
@@ -1158,19 +1432,19 @@ function renderVerifyResultPage(container) {
       <aside class="dashboard__sidebar">
         <nav class="dashboard__nav">
           <div class="dashboard__nav-item" onclick="router.navigate('/regulator')">
-            ⚖️ Dashboard
+            Dashboard
           </div>
           <div class="dashboard__nav-item" onclick="router.navigate('/verify')">
-            🔍 Verify Invoice
+            Verify Invoice
           </div>
           <div class="dashboard__nav-item dashboard__nav-item--active">
-            📋 Result
+            Result
           </div>
         </nav>
       </aside>
       
       <main class="dashboard__main">
-        <div class="container--narrow">
+        <div class="container--narrow" style="margin: 0 auto;">
           <div class="card status-card ${isValid ? 'status-card--valid' : (isTampered ? 'status-card--tampered' : 'status-card--invalid')}">
             <div class="status-card__icon">${isValid ? '✓' : '✗'}</div>
             <h1 class="status-card__title">
@@ -1213,8 +1487,8 @@ function renderVerifyResultPage(container) {
                   <button class="hash-display__copy" onclick="copyToClipboard('${result.onchain_txid}')">Copy</button>
                 </div>
                 <p class="mt-md">
-                  <a href="https://sepolia.etherscan.io/tx/${result.onchain_txid}" target="_blank" style="color: var(--color-primary); text-decoration: underline;">
-                    View on Etherscan →
+                  <a href="https://amoy.polygonscan.com/tx/0x${result.onchain_txid}" target="_blank" style="color: var(--color-primary); text-decoration: underline;">
+                    View on Polygonscan →
                   </a>
                 </p>
               </div>
@@ -1250,7 +1524,7 @@ function renderAboutPage(container) {
         </p>
         
         <div class="card mb-xl">
-          <h3 class="mb-md">🎯 The Problem</h3>
+          <h3 class="mb-md">The Problem</h3>
           <p>
             GST fraud through fake invoices and circular trading costs India billions annually. 
             Traditional systems lack the immutability and transparency needed to detect and prevent such fraud.
@@ -1258,7 +1532,7 @@ function renderAboutPage(container) {
         </div>
         
         <div class="card card--accent-yellow mb-xl">
-          <h3 class="mb-md">💡 Our Solution</h3>
+          <h3 class="mb-md">Our Solution</h3>
           <p>
             GSTchain creates an immutable, tamper-proof record of every invoice by anchoring 
             cryptographic hashes to the Ethereum blockchain. Any modification to an invoice 
@@ -1267,7 +1541,7 @@ function renderAboutPage(container) {
         </div>
         
         <div class="card mb-xl">
-          <h3 class="mb-lg">🏗️ Technology Stack</h3>
+          <h3 class="mb-lg">Technology Stack</h3>
           <div class="grid grid--2" style="gap: 16px;">
             <div>
               <strong>Blockchain</strong>
@@ -1298,7 +1572,7 @@ function renderAboutPage(container) {
         
         <div class="text-center">
           <button class="btn btn--primary btn--large" onclick="router.navigate('/select-role')">
-            Get Started →
+            Get Started
           </button>
         </div>
       </div>
@@ -1345,6 +1619,13 @@ function copyToClipboard(text) {
 // Fraud Detection Page
 // ============================================
 function renderFraudDetectionPage(container) {
+  // Auth guard - redirect to login if not authenticated
+  if (!state.isAuthenticated()) {
+    toast.warning('Please login to access this page');
+    router.navigate('/login/auditor');
+    return;
+  }
+
   container.innerHTML = `
     ${renderHeader()}
     
@@ -1352,13 +1633,13 @@ function renderFraudDetectionPage(container) {
       <aside class="dashboard__sidebar">
         <nav class="dashboard__nav">
           <div class="dashboard__nav-item" onclick="router.navigate('/regulator')">
-            ⚖️ Dashboard
+            Dashboard
           </div>
           <div class="dashboard__nav-item" onclick="router.navigate('/verify')">
-            🔍 Verify Invoice
+            Verify Invoice
           </div>
           <div class="dashboard__nav-item dashboard__nav-item--active">
-            🔄 Cycle Detection
+            Cycle Detection
           </div>
         </nav>
       </aside>
@@ -1372,21 +1653,21 @@ function renderFraudDetectionPage(container) {
         <div class="card mb-xl">
           <div class="flex flex--between" style="align-items: center; flex-wrap: wrap; gap: 16px;">
             <div>
-              <h3>🔄 Cycle Analysis</h3>
+              <h3>Cycle Analysis</h3>
               <p style="color: #666; font-size: 0.9rem;">Scan the invoice graph for circular trading patterns</p>
             </div>
             <button class="btn btn--primary" onclick="runFraudDetection()">
-              🔍 Detect Cycles
+              Detect Cycles
             </button>
           </div>
         </div>
         
         <div class="card mb-xl card--accent-yellow">
-          <h3 class="mb-md">🔎 Search GSTIN</h3>
+          <h3 class="mb-md">Search GSTIN</h3>
           <p style="font-size: 0.9rem; margin-bottom: 16px;">Check if a specific GSTIN is involved in any invoices or suspicious patterns</p>
           <form onsubmit="searchGSTIN(event)" class="flex flex--gap-md" style="flex-wrap: wrap;">
             <input type="text" class="input" id="gstin-search" placeholder="Enter GSTIN e.g., 27ABCDE1234F1Z5" style="flex: 1; min-width: 250px;" required>
-            <button type="submit" class="btn btn--primary">🔍 Search</button>
+            <button type="submit" class="btn btn--primary">Search</button>
           </form>
           
           <div id="gstin-loading" class="hidden mt-lg">
@@ -1430,7 +1711,7 @@ function renderFraudDetectionPage(container) {
         </div>
         
         <div class="card mt-xl">
-          <h3 class="mb-lg">📋 Fraud Detection Rules</h3>
+          <h3 class="mb-lg">Fraud Detection Rules</h3>
           <div id="rules-list">
             <p style="color: #666;">Loading rules...</p>
           </div>
@@ -1468,7 +1749,7 @@ async function runFraudDetection() {
     if (data.cycles.length === 0) {
       cyclesList.innerHTML = `
         <div class="card card--accent-green text-center">
-          <h3>✅ No Suspicious Cycles Detected</h3>
+          <h3>No Suspicious Cycles Detected</h3>
           <p>The invoice graph appears clean.</p>
         </div>
       `;
@@ -1613,8 +1894,8 @@ async function searchGSTIN(e) {
       results.innerHTML = `
         <div style="padding: 16px; background: white; border: 3px solid black;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <h4>📊 GSTIN: ${data.gstin}</h4>
-            ${data.in_cycles ? '<span class="badge badge--error">⚠️ IN CYCLE</span>' : '<span class="badge badge--success">✅ CLEAN</span>'}
+            <h4>GSTIN: ${data.gstin}</h4>
+            ${data.in_cycles ? '<span class="badge badge--error">IN CYCLE</span>' : '<span class="badge badge--success">CLEAN</span>'}
           </div>
           
           <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;">
@@ -1709,10 +1990,290 @@ async function viewInvoiceFromSearch(hash) {
 }
 
 // ============================================
+// Login Pages
+// ============================================
+function renderBusinessLogin(container) {
+  container.innerHTML = `
+    ${renderHeader()}
+    
+    <main class="section" style="min-height: 70vh; display: flex; align-items: center;">
+      <div class="container container--narrow">
+        <div class="card card--no-hover">
+          <h2 class="text-center mb-lg">Business Login</h2>
+          <p class="text-center mb-xl" style="color: #666;">Sign in to upload invoices and manage your proofs</p>
+          
+          <form id="login-form" onsubmit="handleBusinessLogin(event)">
+            <div class="input-group mb-lg">
+              <label class="input-label">Email</label>
+              <input type="email" class="input" name="email" required placeholder="your@email.com">
+            </div>
+            <div class="input-group mb-xl">
+              <label class="input-label">Password</label>
+              <input type="password" class="input" name="password" required placeholder="Enter password">
+            </div>
+            <button type="submit" class="btn btn--primary btn--large" style="width: 100%;">Login</button>
+          </form>
+          
+          <p class="text-center mt-xl" style="color: #666;">
+            Don't have an account? 
+            <a href="#/register/business" style="color: var(--color-primary); font-weight: 600;">Register here</a>
+          </p>
+        </div>
+      </div>
+    </main>
+    
+    ${renderFooter()}
+  `;
+}
+
+function renderAuditorLogin(container) {
+  container.innerHTML = `
+    ${renderHeader()}
+    
+    <main class="section" style="min-height: 70vh; display: flex; align-items: center;">
+      <div class="container container--narrow">
+        <div class="card card--no-hover">
+          <h2 class="text-center mb-lg">Auditor Login</h2>
+          <p class="text-center mb-xl" style="color: #666;">Sign in to verify invoices and detect fraud</p>
+          
+          <form id="login-form" onsubmit="handleAuditorLogin(event)">
+            <div class="input-group mb-lg">
+              <label class="input-label">Email</label>
+              <input type="email" class="input" name="email" required placeholder="your@email.com">
+            </div>
+            <div class="input-group mb-xl">
+              <label class="input-label">Password</label>
+              <input type="password" class="input" name="password" required placeholder="Enter password">
+            </div>
+            <button type="submit" class="btn btn--primary btn--large" style="width: 100%;">Login</button>
+          </form>
+          
+          <p class="text-center mt-xl" style="color: #666;">
+            Don't have an account? 
+            <a href="#/register/auditor" style="color: var(--color-primary); font-weight: 600;">Register here</a>
+          </p>
+        </div>
+      </div>
+    </main>
+    
+    ${renderFooter()}
+  `;
+}
+
+// ============================================
+// Register Pages
+// ============================================
+function renderBusinessRegister(container) {
+  container.innerHTML = `
+    ${renderHeader()}
+    
+    <main class="section" style="min-height: 70vh; display: flex; align-items: center;">
+      <div class="container container--narrow">
+        <div class="card card--no-hover">
+          <h2 class="text-center mb-lg">Business Registration</h2>
+          <p class="text-center mb-xl" style="color: #666;">Create an account to start uploading invoices</p>
+          
+          <form id="register-form" onsubmit="handleBusinessRegister(event)">
+            <div class="input-group mb-lg">
+              <label class="input-label">Company Name</label>
+              <input type="text" class="input" name="company_name" required placeholder="Your Company Ltd.">
+            </div>
+            <div class="input-group mb-lg">
+              <label class="input-label">GSTIN</label>
+              <input type="text" class="input" name="gstin" required placeholder="27ABCDE1234F1Z5">
+            </div>
+            <div class="input-group mb-lg">
+              <label class="input-label">Email</label>
+              <input type="email" class="input" name="email" required placeholder="your@email.com">
+            </div>
+            <div class="input-group mb-lg">
+              <label class="input-label">Phone (Optional)</label>
+              <input type="tel" class="input" name="phone" placeholder="+91 9876543210">
+            </div>
+            <div class="input-group mb-xl">
+              <label class="input-label">Password</label>
+              <input type="password" class="input" name="password" required minlength="6" placeholder="Min 6 characters">
+            </div>
+            <button type="submit" class="btn btn--primary btn--large" style="width: 100%;">Create Account</button>
+          </form>
+          
+          <p class="text-center mt-xl" style="color: #666;">
+            Already have an account? 
+            <a href="#/login/business" style="color: var(--color-primary); font-weight: 600;">Login here</a>
+          </p>
+        </div>
+      </div>
+    </main>
+    
+    ${renderFooter()}
+  `;
+}
+
+function renderAuditorRegister(container) {
+  container.innerHTML = `
+    ${renderHeader()}
+    
+    <main class="section" style="min-height: 70vh; display: flex; align-items: center;">
+      <div class="container container--narrow">
+        <div class="card card--no-hover">
+          <h2 class="text-center mb-lg">Auditor Registration</h2>
+          <p class="text-center mb-xl" style="color: #666;">Create an account to verify invoices</p>
+          
+          <form id="register-form" onsubmit="handleAuditorRegister(event)">
+            <div class="input-group mb-lg">
+              <label class="input-label">Full Name</label>
+              <input type="text" class="input" name="full_name" required placeholder="Your Full Name">
+            </div>
+            <div class="input-group mb-lg">
+              <label class="input-label">License Number</label>
+              <input type="text" class="input" name="license_number" required placeholder="AUD-12345">
+            </div>
+            <div class="input-group mb-lg">
+              <label class="input-label">Organization (Optional)</label>
+              <input type="text" class="input" name="organization" placeholder="Your Organization">
+            </div>
+            <div class="input-group mb-lg">
+              <label class="input-label">Email</label>
+              <input type="email" class="input" name="email" required placeholder="your@email.com">
+            </div>
+            <div class="input-group mb-xl">
+              <label class="input-label">Password</label>
+              <input type="password" class="input" name="password" required minlength="6" placeholder="Min 6 characters">
+            </div>
+            <button type="submit" class="btn btn--primary btn--large" style="width: 100%;">Create Account</button>
+          </form>
+          
+          <p class="text-center mt-xl" style="color: #666;">
+            Already have an account? 
+            <a href="#/login/auditor" style="color: var(--color-primary); font-weight: 600;">Login here</a>
+          </p>
+        </div>
+      </div>
+    </main>
+    
+    ${renderFooter()}
+  `;
+}
+
+// ============================================
+// Auth Handlers
+// ============================================
+async function handleBusinessLogin(e) {
+  e.preventDefault();
+  const form = e.target;
+  const email = form.email.value;
+  const password = form.password.value;
+
+  try {
+    const result = await api.loginBusiness({ email, password });
+    if (state.login(result.access_token, { email: result.user_email, name: result.user_name }, 'business')) {
+      toast.success('Login successful!');
+      router.navigate('/business');
+    }
+  } catch (error) {
+    toast.error(error.message);
+  }
+}
+
+async function handleAuditorLogin(e) {
+  e.preventDefault();
+  const form = e.target;
+  const email = form.email.value;
+  const password = form.password.value;
+
+  try {
+    const result = await api.loginAuditor({ email, password });
+    if (state.login(result.access_token, { email: result.user_email, name: result.user_name }, 'auditor')) {
+      toast.success('Login successful!');
+      router.navigate('/regulator');
+    }
+  } catch (error) {
+    toast.error(error.message);
+  }
+}
+
+async function handleBusinessRegister(e) {
+  e.preventDefault();
+  const form = e.target;
+  const userData = {
+    email: form.email.value,
+    password: form.password.value,
+    company_name: form.company_name.value,
+    gstin: form.gstin.value,
+    phone: form.phone.value || null
+  };
+
+  try {
+    const result = await api.registerBusiness(userData);
+    if (state.login(result.access_token, { email: result.user_email, name: result.user_name }, 'business')) {
+      toast.success('Registration successful!');
+      router.navigate('/business');
+    }
+  } catch (error) {
+    toast.error(error.message);
+  }
+}
+
+async function handleAuditorRegister(e) {
+  e.preventDefault();
+  const form = e.target;
+  const userData = {
+    email: form.email.value,
+    password: form.password.value,
+    full_name: form.full_name.value,
+    license_number: form.license_number.value,
+    organization: form.organization.value || null
+  };
+
+  try {
+    const result = await api.registerAuditor(userData);
+    if (state.login(result.access_token, { email: result.user_email, name: result.user_name }, 'auditor')) {
+      toast.success('Registration successful!');
+      router.navigate('/regulator');
+    }
+  } catch (error) {
+    toast.error(error.message);
+  }
+}
+
+function handleLogout() {
+  // Close dropdown first
+  const dropdown = document.getElementById('user-dropdown-menu');
+  if (dropdown) dropdown.classList.add('hidden');
+
+  state.logout();
+  toast.success('Logged out successfully');
+  router.navigate('/');
+}
+
+function toggleUserDropdown(e) {
+  e.stopPropagation();
+  const dropdown = document.getElementById('user-dropdown-menu');
+  if (dropdown) {
+    dropdown.classList.toggle('hidden');
+
+    // Close dropdown when clicking outside
+    if (!dropdown.classList.contains('hidden')) {
+      const closeDropdown = (event) => {
+        if (!event.target.closest('.user-dropdown')) {
+          dropdown.classList.add('hidden');
+          document.removeEventListener('click', closeDropdown);
+        }
+      };
+      setTimeout(() => document.addEventListener('click', closeDropdown), 0);
+    }
+  }
+}
+
+// ============================================
 // Route Registration
 // ============================================
 router.addRoute('/', renderLanding);
 router.addRoute('/select-role', renderRoleSelection);
+router.addRoute('/login/business', renderBusinessLogin);
+router.addRoute('/login/auditor', renderAuditorLogin);
+router.addRoute('/register/business', renderBusinessRegister);
+router.addRoute('/register/auditor', renderAuditorRegister);
 router.addRoute('/business', renderBusinessDashboard);
 router.addRoute('/upload', renderUploadPage);
 router.addRoute('/proof', renderProofPage);
@@ -1743,6 +2304,9 @@ router.navigate = function (path) {
   originalNavigate(path);
 };
 
+// Initialize state from local storage
+state.init();
+
 // Start the application
 router.start();
 
@@ -1768,4 +2332,14 @@ window.viewInvoiceJSON = viewInvoiceJSON;
 window.searchGSTIN = searchGSTIN;
 window.viewInvoiceFromSearch = viewInvoiceFromSearch;
 
-console.log('⛓️ GSTchain Frontend Loaded');
+// Auth handlers
+window.handleBusinessLogin = handleBusinessLogin;
+window.handleAuditorLogin = handleAuditorLogin;
+window.handleBusinessRegister = handleBusinessRegister;
+window.handleAuditorRegister = handleAuditorRegister;
+window.handleLogout = handleLogout;
+window.handleLogout = handleLogout;
+window.toggleUserDropdown = toggleUserDropdown;
+window.switchAccount = (index) => state.switchAccount(index);
+
+console.log('GSTchain Frontend Loaded');

@@ -10,3 +10,6 @@ pydantic
 python-dateutil
 requests
 web3
+pymongo[srv]
+bcrypt
+python-jose[cryptography]
