@@ -518,7 +518,7 @@ function renderFooter() {
         </div>
         <div>
           <h4 class="footer__title">Technology</h4>
-          <a href="#" class="footer__link">Ethereum Blockchain</a>
+          <a href="#" class="footer__link">Polygon AMOY Blockchain</a>
           <a href="#" class="footer__link">AES-256 Encryption</a>
           <a href="#" class="footer__link">SHA-256 Hashing</a>
           <a href="#" class="footer__link">Neo4j Graph DB</a>
@@ -604,7 +604,7 @@ function renderLanding(container) {
             <div class="feature-card feature-card--large col-span-2 animate-on-scroll animate-fade-up delay-100">
               <div>
                 <h3 class="feature-card__title">Blockchain Anchored</h3>
-                <p>Every invoice hash is anchored to Ethereum, creating an immutable timestamp that can never be altered or deleted. Verification is decentralized and trustless.</p>
+                <p>Every invoice hash is anchored to Polygon, creating an immutable timestamp that can never be altered or deleted. Verification is decentralized and trustless.</p>
               </div>
             </div>
 
@@ -679,7 +679,7 @@ function renderLanding(container) {
               <div class="timeline-dot">4</div>
               <div class="timeline-content">
                 <h4>Anchor to Blockchain</h4>
-                <p>The hash is permanently recorded on the Ethereum blockchain with a verifiable transaction ID, proving the document existed at that specific time.</p>
+                <p>The hash is permanently recorded on the Polygon AMOY blockchain with a verifiable transaction ID, proving the document existed at that specific time.</p>
               </div>
             </div>
           </div>
@@ -1561,7 +1561,7 @@ function renderAboutPage(container) {
           <h3 class="mb-md">Our Solution</h3>
           <p>
             GSTchain creates an immutable, tamper-proof record of every invoice by anchoring 
-            cryptographic hashes to the Ethereum blockchain. Any modification to an invoice 
+            cryptographic hashes to the Polygon AMOY blockchain. Any modification to an invoice 
             is instantly detectable.
           </p>
         </div>
@@ -1571,7 +1571,7 @@ function renderAboutPage(container) {
           <div class="grid grid--2" style="gap: 16px;">
             <div>
               <strong>Blockchain</strong>
-              <p style="color: #666; font-size: 0.9rem;">Ethereum (Sepolia testnet)</p>
+              <p style="color: #666; font-size: 0.9rem;">Polygon AMOY testnet</p>
             </div>
             <div>
               <strong>Encryption</strong>
@@ -2281,7 +2281,7 @@ function renderCyclesVisualization(container) {
             Verify Invoice
           </div>
           <div class="dashboard__nav-item" onclick="router.navigate('/fraud-detection')">
-            Fraud Detection
+            Cycle Detection
           </div>
           <div class="dashboard__nav-item dashboard__nav-item--active">
             Cycle Visualization
