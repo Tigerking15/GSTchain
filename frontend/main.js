@@ -3,7 +3,8 @@
 // ============================================
 
 // API Configuration
-const API_BASE = '/api';
+// API Configuration
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 // ============================================
 // Router

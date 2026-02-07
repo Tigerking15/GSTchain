@@ -1,3 +1,28 @@
 ﻿# Virtual env
 .venv
+venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Environment Variables
 .env
+.env.prod
+.env.*
+
+# Secrets
+passwords.txt
+apitokens.txt
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDE Settings
+.vscode/
+.idea/
+
+# Node modules (just in case)
+node_modules/
+frontend/node_modules/
