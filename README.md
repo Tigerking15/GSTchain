@@ -1,8 +1,6 @@
 # <div align="center">GSTchain: Distributed Circular Trade Detection Ecosystem</div>
 
-<div align="center">
-  <img src="./hero.png" alt="GSTchain Hero" width="800">
-</div>
+
 
 ---
 
@@ -135,19 +133,6 @@ graph TD
    uvicorn app.main:app --reload
    ```
 
----
-
-## 🛡️ Fraud Detection Rules (Implemented)
-
-| Rule ID | Category | Description | Max Risk |
-| :--- | :--- | :--- | :--- |
-| `SAME_DAY_LOOP` | Time | Complete cycle executed within 24 hours | 95/100 |
-| `ROUND_TRIP_<=2%` | Amount | Invoices value deviation less than 2% in a loop | 80/100 |
-| `TINY_GROUP` | Structural | Loops involving only 2-3 unique GSTINs | 80/100 |
-| `HSN_FLIP` | Behavioral | Goods category changes within the trade loop | 85/100 |
-| `BURST_INVOICING` | Behavioral | High volume of invoices in a very short duration | 70/100 |
-
----
 
 ## 📄 License
 
@@ -156,5 +141,5 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ---
 
 <div align="center">
-  Made with 💜 by Shloka Pol
+  Made by Shloka Pol & Saad Shaikh
 </div>
