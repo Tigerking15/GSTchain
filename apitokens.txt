@@ -1,6 +1,0 @@
-TOKEN VALUE: o8AAAKljyx10tmZdCZb85jfhYMFfDNLkdguBtUUk
-Access key id : b421fc79aaae492dfecf6d8135159cf0
-Secret access key : a2103be7c4c31171b56e1fee1b7ba54fea4a2960dc38e10c46f2a615134bc89f
-default endpoint : https://ed3dd57f41e00231c80204869124acff.r2.cloudflarestorage.com
-
-ACCOUNT ID : ed3dd57f41e00231c80204869124acff
